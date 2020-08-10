@@ -4,3 +4,5 @@ text style transfer based on **[Style Transfer from Non-Parallel Text by Cross-A
 * dataset (NSMC) preprocessing & loading
 * baseline re-implementation (https://github.com/shentianxiao/language-style-transfer)
 * improve GAN objective
+* write evaluation code
+* run experiments
