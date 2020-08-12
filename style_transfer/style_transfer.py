@@ -93,7 +93,7 @@ class Generator(nn.Module):
                 prediction = self.fc_out(output)
                 predictions[t] = prediction # predictions are for calculating loss_rec
                 input = self.embedding(src[t]).unsqueeze(0)
-            
-        outputs = torch.concat((h0, outputs), 1) # according to the paper you need h0 in the sequence to feed the discriminator
+        # outputs = [ sequence_len, batch, hidden_state_size]
+        outputs = torch.cat((h0.unsqueeze(0), outputs), 0) # according to the paper you need h0 in the sequence to feed the discriminator
 
         return outputs, predictions
