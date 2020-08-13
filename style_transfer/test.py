@@ -96,6 +96,7 @@ class TestModules(unittest.TestCase):
         self.dim_z = 30
         self.embed_dim = 100
         self.dropout = 0.1
+        self.temperature = 0.0001
 
         self.embedding_kor = nn.Embedding(len(KOR.vocab),self.embed_dim)
         self.embedding_eng = nn.Embedding(len(ENG.vocab),self.embed_dim)
@@ -119,11 +120,59 @@ class TestModules(unittest.TestCase):
 
         encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
         
-        size = encoder(self.embedding_eng(sample), sample_len, labels).shape
-        assert size == torch.Size((self.batch_size, self.dim_z))
+        z = encoder(labels, self.embedding_eng(sample), sample_len)
+        assert z.shape == torch.Size((self.batch_size, self.dim_z))
 
     def test_decoder(self):
-        pass
+        sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
+        sample_eng, sample_eng_len = next(iter(self.train_iterator_eng))
+        
+        labels_kor = torch.zeros(self.batch_size)
+        labels_eng = torch.ones(self.batch_size)
+        
+        encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
+        decoder = Decoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
+        
+        z_kor = encoder(labels_kor, self.embedding_kor(sample_kor), sample_kor_len)
+        z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
+        
+
+        h_ori_seq, predictions_ori = decoder(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
+        h_trans_seq, _             = decoder(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
+
+        assert h_ori_seq.shape = torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z)))
+        assert h_trans_seq.shape = torch.Size((len(sample_kor)+1, self.batch_size, self.dim_y+self.dim_z))
+        assert predictions_ori = torch.Size((len(sample_kor),self.batch_size,self.embedding_kor.num_embeddings))
+
+    def test_textCNN(self):
+        sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
+        sample_eng, sample_eng_len = next(iter(self.train_iterator_eng))
+        
+        labels_kor = torch.zeros(self.batch_size)
+        labels_eng = torch.ones(self.batch_size)
+        
+        encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
+        decoder = Decoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
+        
+        # arguments for textCNN
+        n_filters = 5
+        filter_sizes = [1,2,3,4,5]
+        output_dim = 1
+        cnn = TextCNN(self.dim_y+self.dim_z, n_filters, filter_sizes, output_dim, self.dropout)
+
+        z_kor = encoder(labels_kor, self.embedding_kor(sample_kor), sample_kor_len)
+        z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
+        
+
+        h_ori_seq, predictions_ori = decoder(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
+        h_trans_seq, _             = decoder(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
+        
+        d_ori = cnn(h_ori_seq)
+        d_trans = cnn(h_trans_seq)
+
+        assert d_ori.size == torch.Size((self.batch_size, output_dim))
+        assert d_trans.size == torch.Size((self.batch_size, output_dim))
+
     def test_discriminator(self):
         pass
 

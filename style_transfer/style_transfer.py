@@ -18,7 +18,7 @@ class Encoder(nn.Module):
         self.rnn = nn.GRU(embed_dim, dim_y + dim_z,num_layers=1, dropout=dropout)
         self.dim_y = dim_y
     
-    def forward(self, src, src_len, labels):
+    def forward(self, labels, src, src_len ):
         labels = labels.unsqueeze(-1) # (batch_size, 1), 엔코더 밖에서 해줘도 괜찮을 듯
         packed_embed = nn.utils.rnn.pack_padded_sequence(src, src_len) # input input to rnn
         
@@ -33,7 +33,7 @@ class Encoder(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self,batch_size, embed_dim, embeddings, dim_y, dim_z, temperature):
+    def __init__(self, batch_size, embed_dim, dim_y, dim_z, dropout, temperature):
         """
         Required Parameters:
             all the same exept "z" which is the output from the Encoder
@@ -41,16 +41,16 @@ class Generator(nn.Module):
         super().__init__() 
         self.gamma = temperature
         self.dim_h = dim_y + dim_z
-        self.embedding = embeddings
+
         self.batch_size = batch_size
 
         self.fc = nn.Linear(1, dim_y)
         # The hidden state's dimension: dim_y + dim_z
-        self.rnn = nn.GRU(embed_dim, self.dim_h, num_layers=1)
+        self.rnn = nn.GRU(embed_dim, self.dim_h, num_layers=1, dropout=dropout)
         # ISSUE : 두 개의 fc_out 이 필요한 것인가 -> 원본 코드에서는 동일한 vocab을 공유하는 듯 하다.
         self.fc_out = nn.Linear(self.dim_h, self.embedding.num_embeddings) 
 
-    def forward(self, z, src, src_len, labels, transfered = True):
+    def forward(self, z, labels, embeddings, src, src_len, transfered = True):
         """
         Required Parameters
             z : output from the encoder
@@ -62,7 +62,8 @@ class Generator(nn.Module):
         #QUESTION: Max_len 어떻게 처리할래?
         # unroll은 어디까지? end_of_token까지 인가? # 원래 코드는 max_seq 만큼 time step 진행
         labels = labels.unsqueeze(-1)  # (batch_size, 1)
-
+        
+        # placeholders for outputs and prediction tensors
         outputs = torch.zeros(*src.shape, self.dim_h)
         predictions = torch.zeros(*src.shape, self.embedding.num_embeddings) # g_logits in original code
         
@@ -70,7 +71,7 @@ class Generator(nn.Module):
             # using softmax to feed previous decoding
             h0 = torch.cat((self.fc(1-labels), z), -1)  #h0_transfered
             
-            input = self.embedding(TRG.vocab['<sos>']).repeat(32,1) # <go> or <sos>
+            input = self.embedding(TRG.vocab['<sos>']).repeat(self.batch_size,1) # <go> or <sos> # batch size 만큼 늘리기
             input = input.unsqueeze(0)
             hidden = h0.unsqueeze(0) # [num_layers * num_directions = 1, batch, hidden_size]
             for t in range(1, src_len): 
@@ -78,8 +79,8 @@ class Generator(nn.Module):
                 outputs[t] = output
                 prediction = self.fc_out(output)
                 predictions[t] = prediction
-                # TODO: max 를 뽑아낼 수 있게 해야 한다??? 원본코드의 softsample_word를 참조
-                input = (F.gumbel_softmax(prediction) / self.gamma) * self.embedding.weights
+                # 원본코드의 softsample_word를 참조
+                input = (F.gumbel_softmax(prediction) / self.gamma) * embeddings.weight
             
 
         else:
@@ -87,8 +88,7 @@ class Generator(nn.Module):
             # using teacher forcing
             input = self.embedding(src[0]).unsqueeze(0)    
             hidden = h0.unsqueeze(0) # [num_layers * num_directions = 1, batch, hidden_size]
-            for t in range(1,max(src_len)):
-                print(input.shape)      
+            for t in range(1,max(src_len)):    
                 output, hidden = self.rnn(input, hidden)
                 outputs[t] = output 
                 prediction = self.fc_out(output)
