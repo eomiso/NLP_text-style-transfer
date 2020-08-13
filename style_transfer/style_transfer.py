@@ -14,8 +14,9 @@ class Encoder(nn.Module):
         super().__init__()
         self.fc = nn.Linear( 1, dim_y) # output: (batch_size, dim_y)
         self.init_z = torch.zeros(batch_size, dim_z)
-        
+
         self.rnn = nn.GRU(embed_dim, dim_y + dim_z,num_layers=1, dropout=dropout)
+        self.dim_y = dim_y
     
     def forward(self, src, src_len, labels):
         labels = labels.unsqueeze(-1) # (batch_size, 1), 엔코더 밖에서 해줘도 괜찮을 듯
@@ -27,7 +28,7 @@ class Encoder(nn.Module):
         _, hidden = self.rnn(packed_embed, init_hidden.unsqueeze(0))
         # hidden : hidden_state of the final time step
         hidden = hidden.squeeze(0)
-        z = hidden[:, dim_y:]
+        z = hidden[:, self.dim_y:]
         return z
 
 
