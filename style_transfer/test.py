@@ -32,8 +32,8 @@ class TestModules(unittest.TestCase):
         토큰화를 위한 형태소분석기를 정의해줍니다.
         """
         init_jvm()
-        self.okt = Okt() 
-        self.stop_words = [  # 불용어를 정의합니다.
+        okt = Okt() 
+        stop_words = [  # 불용어를 정의합니다.
             '은', '는', '이', '가', '하', '아', '것', '들', '의', '있', '되', '수',
             '보', '주', '등', '한', '을', '를'
         ]
@@ -45,7 +45,7 @@ class TestModules(unittest.TestCase):
             review_text = re.sub("[^가-힣ㄱ-ㅎㅏ-ㅣ\\s]", "", text)
 
             # 2. okt 객체를 활용해서 형태소 단위로 나눈다.
-            word_review = self.okt.morphs(review_text, stem=True)
+            word_review = okt.morphs(review_text, stem=True)
 
             # 3. 불용어 제거
             word_review = [token for token in word_review if not token in stop_words]
