@@ -32,12 +32,12 @@ class TestModules(unittest.TestCase):
     토큰화를 위한 형태소분석기를 정의해줍니다.
     """
     init_jvm()
-    okt = Okt() 
-    stop_words = [  # 불용어를 정의합니다.
+    self.okt = Okt() 
+    self.stop_words = [  # 불용어를 정의합니다.
         '은', '는', '이', '가', '하', '아', '것', '들', '의', '있', '되', '수',
         '보', '주', '등', '한', '을', '를'
     ]
-    def tokenize(text):
+    def tokenize(self,text):
         """
         code modified from https://github.com/reniew/NSMC_Sentimental-Analysis
         """
@@ -45,7 +45,7 @@ class TestModules(unittest.TestCase):
         review_text = re.sub("[^가-힣ㄱ-ㅎㅏ-ㅣ\\s]", "", text)
 
         # 2. okt 객체를 활용해서 형태소 단위로 나눈다.
-        word_review = Okt.morphs(review_text, stem=True)
+        word_review = self.okt.morphs(review_text, stem=True)
 
         # 3. 불용어 제거
         word_review = [token for token in word_review if not token in stop_words]
@@ -90,15 +90,21 @@ class TestModules(unittest.TestCase):
     ENG.build_vocab(train_data1, min_freq=3)
     
 
-    batch_size = 32
-    dim_y = 10
-    dim_z = 30
-    embed_dim = 100
-    dropout = 0.1
+    self.batch_size = 32
+    self.dim_y = 10
+    self.dim_z = 30
+    self.embed_dim = 100
+    self.dropout = 0.1
 
-    embedding_kor = nn.Embedding(len(KOR.vocab),embed_dim)
-    embedding_eng = nn.Embedding(len(ENG.vocab),embed_dim)
+    self.embedding_kor = nn.Embedding(len(KOR.vocab),embed_dim)
+    self.embedding_eng = nn.Embedding(len(ENG.vocab),embed_dim)
 
+    train_iterator_kor = data.BucketIterator(
+        train_data_eng, 
+        batch_size=batch_size,
+        sort_within_batch=True,
+        sort_key=lambda x : len(x.korean),
+    )
     train_iterator_eng = data.BucketIterator(
         train_data_eng, 
         batch_size=batch_size,
@@ -107,13 +113,13 @@ class TestModules(unittest.TestCase):
     )
 
     def test_encoder(self):
-        sample, sample_len = next(iter(train_iterator_eng))
-        labels = torch.ones(batch_size)
+        sample, sample_len = next(iter(self.train_iterator_eng))
+        labels = torch.ones(self.batch_size)
 
-        encoder = Encoder(batch_size, embed_dim, dim_y, dim_z, dropout)
+        encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
         
-        size = encoder(embedding_eng(sample), sample_len, labels).shape
-        assert size == torch.Size((batch_size, dim_z))
+        size = encoder(self.embedding_eng(sample), sample_len, labels).shape
+        assert size == torch.Size((self.batch_size, self.dim_z))
 
     def test_decoder(self):
         pass
