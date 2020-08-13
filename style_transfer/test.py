@@ -59,13 +59,13 @@ class TestModules(unittest.TestCase):
         """
         from torchtext import data
 
-        KOR = data.Field(       # 한국어 문장
+        self.KOR = data.Field(       # 한국어 문장
             tokenize=tokenize,
             init_token='<sos>', # 문장의 시작 토큰
             eos_token='<eos>',  # 문장의 끝 토큰
             include_lengths=True
         )
-        ENG = data.Field(       # 영어 문장
+        self.ENG = data.Field(       # 영어 문장
             tokenize='spacy',
             init_token='<sos>',
             eos_token='<eos>',
@@ -86,8 +86,8 @@ class TestModules(unittest.TestCase):
             field=[('english', ENG)]
         )
         
-        KOR.build_vocab(train_data0, min_freq=3)
-        ENG.build_vocab(train_data1, min_freq=3)
+        self.KOR.build_vocab(train_data0, min_freq=3)
+        self.ENG.build_vocab(train_data1, min_freq=3)
         
 
         self.batch_size = 32
@@ -99,13 +99,13 @@ class TestModules(unittest.TestCase):
         self.embedding_kor = nn.Embedding(len(KOR.vocab),embed_dim)
         self.embedding_eng = nn.Embedding(len(ENG.vocab),embed_dim)
 
-        train_iterator_kor = data.BucketIterator(
+        self.train_iterator_kor = data.BucketIterator(
             train_data_eng, 
             batch_size=batch_size,
             sort_within_batch=True,
             sort_key=lambda x : len(x.korean),
         )
-        train_iterator_eng = data.BucketIterator(
+        self.train_iterator_eng = data.BucketIterator(
             train_data_eng, 
             batch_size=batch_size,
             sort_within_batch=True,
