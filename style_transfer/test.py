@@ -101,13 +101,13 @@ class TestModules(unittest.TestCase):
 
         self.train_iterator_kor = data.BucketIterator(
             train_data_eng, 
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             sort_within_batch=True,
             sort_key=lambda x : len(x.korean),
         )
         self.train_iterator_eng = data.BucketIterator(
             train_data_eng, 
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             sort_within_batch=True,
             sort_key=lambda x : len(x.english),
         )
