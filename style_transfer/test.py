@@ -86,8 +86,8 @@ class TestModules(unittest.TestCase):
             fields=[('english', self.ENG)]
         )
         
-        self.KOR.build_vocab(train_data0, min_freq=3)
-        self.ENG.build_vocab(train_data1, min_freq=3)
+        self.KOR.build_vocab(train_data_kor, min_freq=3)
+        self.ENG.build_vocab(train_data_eng, min_freq=3)
         
 
         self.batch_size = 32
