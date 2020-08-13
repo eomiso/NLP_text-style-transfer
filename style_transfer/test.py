@@ -59,13 +59,13 @@ class TestModules(unittest.TestCase):
         """
         from torchtext import data
 
-        self.KOR = data.Field(       # 한국어 문장
+        KOR = data.Field(       # 한국어 문장
             tokenize=tokenize,
             init_token='<sos>', # 문장의 시작 토큰
             eos_token='<eos>',  # 문장의 끝 토큰
             include_lengths=True
         )
-        self.ENG = data.Field(       # 영어 문장
+        ENG = data.Field(       # 영어 문장
             tokenize='spacy',
             init_token='<sos>',
             eos_token='<eos>',
@@ -76,7 +76,7 @@ class TestModules(unittest.TestCase):
         train_data_kor = data.TabularDataset(
             path='1000sents.csv',
             format='csv',
-            fields=[('korean', self.KOR)],
+            fields=[('korean', KOR)],
             skip_header=True
         )
 
@@ -86,8 +86,8 @@ class TestModules(unittest.TestCase):
             fields=[('english', self.ENG)]
         )
         
-        self.KOR.build_vocab(train_data_kor, min_freq=3)
-        self.ENG.build_vocab(train_data_eng, min_freq=3)
+        KOR.build_vocab(train_data_kor, min_freq=3)
+        ENG.build_vocab(train_data_eng, min_freq=3)
         
 
         self.batch_size = 32
