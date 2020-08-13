@@ -37,7 +37,7 @@ class TestModules(unittest.TestCase):
             '은', '는', '이', '가', '하', '아', '것', '들', '의', '있', '되', '수',
             '보', '주', '등', '한', '을', '를'
         ]
-        def tokenize(self,text):
+        def tokenize(text):
             """
             code modified from https://github.com/reniew/NSMC_Sentimental-Analysis
             """
@@ -60,7 +60,7 @@ class TestModules(unittest.TestCase):
         from torchtext import data
 
         self.KOR = data.Field(       # 한국어 문장
-            tokenize=self.tokenize,
+            tokenize=tokenize,
             init_token='<sos>', # 문장의 시작 토큰
             eos_token='<eos>',  # 문장의 끝 토큰
             include_lengths=True
