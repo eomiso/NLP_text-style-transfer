@@ -83,7 +83,7 @@ class TestModules(unittest.TestCase):
         train_data_eng = data.TabularDataset(
             path='1000sents.csv',
             format='csv',
-            field=[('english', self.ENG)]
+            fields=[('english', self.ENG)]
         )
         
         self.KOR.build_vocab(train_data0, min_freq=3)
