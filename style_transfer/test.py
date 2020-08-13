@@ -96,8 +96,8 @@ class TestModules(unittest.TestCase):
         self.embed_dim = 100
         self.dropout = 0.1
 
-        self.embedding_kor = nn.Embedding(len(KOR.vocab),embed_dim)
-        self.embedding_eng = nn.Embedding(len(ENG.vocab),embed_dim)
+        self.embedding_kor = nn.Embedding(len(KOR.vocab),self.embed_dim)
+        self.embedding_eng = nn.Embedding(len(ENG.vocab),self.embed_dim)
 
         self.train_iterator_kor = data.BucketIterator(
             train_data_eng, 
