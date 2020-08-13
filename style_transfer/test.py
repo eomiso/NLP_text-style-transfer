@@ -60,7 +60,7 @@ class TestModules(unittest.TestCase):
         from torchtext import data
 
         self.KOR = data.Field(       # 한국어 문장
-            tokenize=tokenize,
+            tokenize=self.tokenize,
             init_token='<sos>', # 문장의 시작 토큰
             eos_token='<eos>',  # 문장의 끝 토큰
             include_lengths=True
