@@ -5,6 +5,7 @@ import requests
 import os
 import re
 
+import torch
 import torch.nn as nn
 import torchtext
 from konlpy import init_jvm
