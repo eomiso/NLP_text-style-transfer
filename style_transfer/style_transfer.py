@@ -1,15 +1,17 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
+from options import load_arguments
 class Encoder(nn.Module):
     def __init__(self, batch_size, embed_dim, dim_y, dim_z, dropout):
         """
         Required parameters:
-            batch_size, dim_z, dim_y, embed_dim, labels
+            batch_size:
+
+            dim_y: 
+            dim_z: 
+            embed_dim:
+            
         """
         super().__init__()
         self.fc = nn.Linear( 1, dim_y) # output: (batch_size, dim_y)
@@ -36,8 +38,15 @@ class Generator(nn.Module):
     def __init__(self, batch_size, embedding, embed_dim, dim_y, dim_z, dropout, temperature, idx_sos=torch.tensor([2], dtype=int)):
         #TODO: self.Generator 생성시에 embedding을 넣어주면 embed_dim을 넣어줄 필요가 없다. generator 개수가 여러개여도 되는지 논의해보고 결정
         """
-        Required Parameters:
-            all the same exept "z" which is the output from the Encoder
+        Required parameters:
+            batch_size: .
+            embedding: nn.Embedding()
+            embed_dim: dimension of embedding (repetition, could be erased if necessary)
+            dim_y: .
+            dim_z: .
+            dropout: refer to the paper
+            temperature: refer to the paper
+            idx_sos: TEXT.vocab['<sos>'] set to torch.tensor([2], dtype=int) as default
         """
         super().__init__() 
         self.gamma = temperature
@@ -56,22 +65,26 @@ class Generator(nn.Module):
     def forward(self, z, labels, src, src_len, transfered = True):
         """
         Required Parameters
-            z : output from the encoder
-            src, src_len : for teacher forcing the original sentence
+            src: original sentence
+            src_len: original sentence len
+            TODO : implement beam search?
+            TODO : unroll up to the length of original sequence length (to be changed if necessary)
+            # unroll은 어디까지? end_of_token까지 인가? # 원래 코드는 max_seq 만큼 time step 진행
+        
+        * use gumbel_softmax
 
-        z, labels, 를 이용해서 inital hidden을 Genrator 앞에다가 넣어줘야 한다.
+        Returns:
+            outpus: feed to discriminator
+            predictions: get loss_rec
         """
-        #QUESTION: Packed padded sequence를 decoder부분에서도 써줘야 하는가?
-        #QUESTION: Max_len 어떻게 처리할래?
-        # unroll은 어디까지? end_of_token까지 인가? # 원래 코드는 max_seq 만큼 time step 진행
         labels = labels.unsqueeze(-1)  # (batch_size, 1)
         
         # placeholders for outputs and prediction tensors
-        outputs = torch.zeros(*src.shape, self.dim_h)
-        predictions = torch.zeros(*src.shape, self.embedding.num_embeddings) # g_logits in original code
+        outputs = torch.zeros(*src.shape, self.dim_h) # outputs = [max_sentence_len, batch_size, dim_h]
+        predictions = torch.zeros(*src.shape, self.embedding.num_embeddings) # g_logits in original code [",", vocab size]
         
         if transfered:
-            # using softmax to feed previous decoding
+            # Feed previous decoding
             h0 = torch.cat((self.fc(1-labels), z), -1)  #h0_transfered
             
             input = self.embedding(self.index_sos).repeat(self.batch_size, 1) # <go> or <sos> # batch size 만큼 늘리기
@@ -80,24 +93,25 @@ class Generator(nn.Module):
             for t in range(1, max(src_len)): #TODO: src_len 는 tensor 이기 때문에 그중에 가장 큰것만 사용 
                 output, hidden = self.rnn(input, hidden)
                 outputs[t] = output
-                prediction = self.fc_out(output) # TODO: 두 개의 다른언어일 경우에 vocab, embeddings 가 각각 2개이고 그 결과 generator도 2개가 있어야 한다. 
+                prediction = self.fc_out(output) 
+                # TODO: 두 개의 다른언어일 경우에 vocab, embeddings 가 각각 2개이고 그 결과 generator도 2개가 있어야 한다. 
                 predictions[t] = prediction
                 # 원본코드의 softsample_word를 참조
                 input = torch.matmul(F.gumbel_softmax(prediction) / self.gamma, self.embedding.weight)
             
 
         else:
+            # Teacher Forcing
             h0 =  torch.cat((self.fc(labels), z), -1)  #h0_original
-            # using teacher forcing
             input = self.embedding(src[0]).unsqueeze(0)    
-            hidden = h0.unsqueeze(0) # [num_layers * num_directions = 1, batch, hidden_size]
+            hidden = h0.unsqueeze(0) # [1, batch_size, hidden_size]
             for t in range(1,max(src_len)):    
                 output, hidden = self.rnn(input, hidden)
                 outputs[t] = output 
                 prediction = self.fc_out(output)
                 predictions[t] = prediction # predictions are for calculating loss_rec
                 input = self.embedding(src[t]).unsqueeze(0)
-        # outputs = [ sequence_len, batch, hidden_state_size]
+        # outputs = [ sequence_len, batch_size, hidden_size]
         outputs = torch.cat((h0.unsqueeze(0), outputs), 0) # according to the paper you need h0 in the sequence to feed the discriminator
 
         return outputs, predictions
@@ -153,3 +167,8 @@ class TextCNN(nn.Module):
         #cat = [batch size, n_filters * len(filter_sizes)]
 
         return self.fc(cat)
+
+
+if __name__ == "__main__":
+    args = load_arguments()
+    
