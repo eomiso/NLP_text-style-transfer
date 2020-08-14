@@ -24,10 +24,10 @@ class Encoder(nn.Module):
         labels = labels.unsqueeze(-1) # (batch_size, 1), 엔코더 밖에서 해줘도 괜찮을 듯
         packed_embed = nn.utils.rnn.pack_padded_sequence(src, src_len) # input input to rnn
         
-        # initial hidden state of the encoder :cat ( y, z)
-        # QUESTION: y를 만드는 linear fuction 의 파라미터도 학습의 대상이 되는게 맞겠지?
-        self.init_z = self.init_z.repeat(src.shape[1], 1) # [ batch size: src.shape[1] , dim_z ]
-        init_hidden = torch.cat((self.fc(labels), self.init_z), -1) 
+        # initial hidden state of the encoder: concat ( y, z)   
+             
+        init_z = self.init_z.repeat(src.shape[1], 1) # [ batch size: src.shape[1] , dim_z ]
+        init_hidden = torch.cat((self.fc(labels), init_z), -1) 
         _, hidden = self.rnn(packed_embed, init_hidden.unsqueeze(0))
         # hidden : hidden_state of the final time step
         hidden = hidden.squeeze(0)
@@ -58,7 +58,7 @@ class Generator(nn.Module):
         self.fc = nn.Linear(1, dim_y)
         # The hidden state's dimension: dim_y + dim_z
         self.rnn = nn.GRU(embed_dim, self.dim_h, num_layers=1, dropout=dropout)
-        # ISSUE : 두 개의 fc_out 이 필요한 것인가 -> 원본 코드에서는 동일한 vocab을 공유하는 듯 하다.
+        # TODO : 두 개의 fc_out 이 필요한 것인가(translation의 경우에) -> 원본 코드에서는 동일한 vocab을 공유하는 듯 하다.
         self.fc_out = nn.Linear(self.dim_h, self.embedding.num_embeddings) 
 
     def forward(self, z, labels, src, src_len, transfered = True):
@@ -169,12 +169,19 @@ class TextCNN(nn.Module):
         return self.fc(cat)
 
 def train(*models, iterator_0, iterator_1, epochs=20, lr=1e-3):
+    tmp = "Epoch: {:3d} | Time:{:.4f} ms | Loss_rec: {:4.f} | loss_adv: {:.4f}"
+    for epoch in range(epochs):
+        
+
     pass
-def evaluate(*models, iterator_0, iterator_1, ):
+def evaluate(*models, iterator_0, iterator_1):
+    
     pass
 
 if __name__ == "__main__":
     args = load_arguments()
+
+    generator
 
     # TODO: Get iterators from bucketIterator
     
