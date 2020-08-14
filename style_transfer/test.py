@@ -140,8 +140,8 @@ class TestModules(unittest.TestCase):
         z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
         
 
-        h_ori_seq, predictions_ori = generator(z_kor, labels_kor, sample_kor, sample_kor_len, transfered = False)
-        h_trans_seq, _             = generator(z_eng, labels_kor, sample_kor, sample_kor_len, transfered = True)
+        h_ori_seq, predictions_ori = generator_kor(z_kor, labels_kor, sample_kor, sample_kor_len, transfered = False)
+        h_trans_seq, _             = generator_kor(z_eng, labels_kor, sample_kor, sample_kor_len, transfered = True)
 
         assert h_ori_seq.shape == torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z))
         assert h_trans_seq.shape == torch.Size((len(sample_kor)+1, self.batch_size, self.dim_y+self.dim_z))

@@ -33,7 +33,7 @@ class Encoder(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, batch_size, embedding, embed_dim, dim_y, dim_z, dropout, temperature, idx_sos=2):
+    def __init__(self, batch_size, embedding, embed_dim, dim_y, dim_z, dropout, temperature, idx_sos=torch.tensor([2], dtype=int)):
         #TODO: self.Generator 생성시에 embedding을 넣어주면 embed_dim을 넣어줄 필요가 없다. generator 개수가 여러개여도 되는지 논의해보고 결정
         """
         Required Parameters:
@@ -74,7 +74,7 @@ class Generator(nn.Module):
             # using softmax to feed previous decoding
             h0 = torch.cat((self.fc(1-labels), z), -1)  #h0_transfered
             
-            input = self.embedding(self.index_sos).repeat(self.batch_size,1) # <go> or <sos> # batch size 만큼 늘리기
+            input = self.embedding(self.index_sos).repeat(self.batch_size, 1) # <go> or <sos> # batch size 만큼 늘리기
             input = input.unsqueeze(0)
             hidden = h0.unsqueeze(0) # [num_layers * num_directions = 1, batch, hidden_size]
             for t in range(1, src_len): 
