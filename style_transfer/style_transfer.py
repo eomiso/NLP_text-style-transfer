@@ -138,6 +138,7 @@ class TextCNN(nn.Module):
         self.fc = nn.Linear(len(filter_sizes) * n_filters, output_dim)
         self.dropout = nn.Dropout(dropout)
     def forward(self, hiddens): 
+        # don't forget the permutation
         #hiddens = [batch_size, hiddens seq len, dim_h]
         hiddens = hiddens.unsqueeze(1)
         #hiddens = [batch_size, 1, hiddens seq len, dim_h]

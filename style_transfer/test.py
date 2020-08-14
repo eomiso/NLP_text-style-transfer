@@ -143,9 +143,9 @@ class TestModules(unittest.TestCase):
         h_ori_seq, predictions_ori = generator_kor(z_kor, labels_kor, sample_kor, sample_kor_len, transfered = False)
         h_trans_seq, _             = generator_kor(z_eng, labels_kor, sample_kor, sample_kor_len, transfered = True)
 
-        assert h_ori_seq.shape == torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z))
-        assert h_trans_seq.shape == torch.Size((len(sample_kor)+1, self.batch_size, self.dim_y+self.dim_z))
-        assert predictions_ori.shape == torch.Size((len(sample_kor),self.batch_size,self.embedding_kor.num_embeddings))
+        assert h_ori_seq.shape == torch.Size((max(sample_kor_len)+1,self.batch_size, self.dim_y+self.dim_z))
+        assert h_trans_seq.shape == torch.Size((max(sample_kor_len)+1, self.batch_size, self.dim_y+self.dim_z))
+        assert predictions_ori.shape == torch.Size((max(sample_kor_len),self.batch_size,self.embedding_kor.num_embeddings))
 
     def test_textCNN(self):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
@@ -172,6 +172,9 @@ class TestModules(unittest.TestCase):
         h_ori_seq, predictions_ori = generator_kor(z_kor, labels_kor, sample_kor, sample_kor_len, transfered = False)
         h_trans_seq, _             = generator_kor(z_eng, labels_kor, sample_kor, sample_kor_len, transfered = True)
         
+        h_ori_seq = torch.permutation(1,0,2)
+        h_trans_eq = torch.permutation(1,0,2)
+
         d_ori = cnn(h_ori_seq)
         d_trans = cnn(h_trans_seq)
 
