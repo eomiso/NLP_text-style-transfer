@@ -100,3 +100,54 @@ class Generator(nn.Module):
         outputs = torch.cat((h0.unsqueeze(0), outputs), 0) # according to the paper you need h0 in the sequence to feed the discriminator
 
         return outputs, predictions
+
+class Discriminator(nn.Module):
+    def __init__(self,dim_h, n_filters, filter_sizes, output_dim, dropout):
+        super().__init__()
+        self.cnn = TextCNN(dim_h, n_filters, filter_sizes, output_dim, dropout)
+        self.criterion_adv = nn.BCELoss()
+    
+    def forward(self, h_sequence_real, h_sequence_fake):
+        d_real = self.cnn(h_sequence_real)
+        d_fake = self.cnn(h_sequence_fake)
+        predictions_real = F.sigmoid(d_real) 
+        predictions_fake = F.sigmoid(d_fake)
+        predictions = torch.cat((predictions_real, predictions_fake), dim = -1)
+        # predictions = [ batch_size ]
+
+        label_real = torch.ones(len(predictions_real), dtype=torch.long)
+        label_fake = torch.zeros(len(predictions_fake), dtype=torch.long)
+
+        loss_D = self.criterion_adv( predictions, torch.cat(label_real, label_fake))
+        loss_G = self.criterion_adv(predictions_fake,label_real)
+
+        return loss_D, loss_G
+
+
+class TextCNN(nn.Module):
+    def __init__(self, dim_h, n_filters, filter_sizes, output_dim, dropout): 
+        # 원본 코드 상의 output_dim은 1
+        super().__init__()
+        self.convs = nn.ModuleList([
+                                    nn.Conv2d(in_channels = 1,
+                                              out_channels = n_filters,
+                                              kernel_size = (fs, dim_h)) \
+                                    for fs in filter_sizes
+                                    ])
+        self.fc = nn.Linear(len(filter_sizes) * n_filters, output_dim)
+        self.dropout = nn.Dropout(dropout)
+    def forward(self, hiddens): 
+        #hiddens = [batch_size, hiddens seq len, dim_h]
+        hiddens = hiddens.unsqueeze(1)
+        #hiddens = [batch_size, 1, hiddens seq len, dim_h]
+
+        conved = [F.leaky_relu(conv(hiddens)).squeeze(3) for conv in self.convs]
+        #conved[n] = [batch size, n_filters, dim_h - filter_sizez[n] + 1]
+
+        pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
+        #pooled[n] = [batch size, n_filters]
+
+        cat = self.dropout(torch.cat(pooled, dim =1))
+        #cat = [batch size, n_filters * len(filter_sizes)]
+
+        return self.fc(cat)
