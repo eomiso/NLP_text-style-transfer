@@ -123,7 +123,7 @@ class TestModules(unittest.TestCase):
         z = encoder(labels, self.embedding_eng(sample), sample_len)
         assert z.shape == torch.Size((self.batch_size, self.dim_z))
 
-    def test_decoder(self):
+    def test_generator(self):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
         sample_eng, sample_eng_len = next(iter(self.train_iterator_eng))
         
@@ -131,16 +131,16 @@ class TestModules(unittest.TestCase):
         labels_eng = torch.ones(self.batch_size)
         
         encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
-        decoder = Decoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
+        generator = Generator(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
         
         z_kor = encoder(labels_kor, self.embedding_kor(sample_kor), sample_kor_len)
         z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
         
 
-        h_ori_seq, predictions_ori = decoder(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
-        h_trans_seq, _             = decoder(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
+        h_ori_seq, predictions_ori = generator(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
+        h_trans_seq, _             = generator(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
 
-        assert h_ori_seq.shape = torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z)))
+        assert h_ori_seq.shape = torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z))
         assert h_trans_seq.shape = torch.Size((len(sample_kor)+1, self.batch_size, self.dim_y+self.dim_z))
         assert predictions_ori = torch.Size((len(sample_kor),self.batch_size,self.embedding_kor.num_embeddings))
 
@@ -152,7 +152,7 @@ class TestModules(unittest.TestCase):
         labels_eng = torch.ones(self.batch_size)
         
         encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
-        decoder = Decoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
+        generator = Generator(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
         
         # arguments for textCNN
         n_filters = 5
@@ -164,8 +164,8 @@ class TestModules(unittest.TestCase):
         z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
         
 
-        h_ori_seq, predictions_ori = decoder(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
-        h_trans_seq, _             = decoder(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
+        h_ori_seq, predictions_ori = generator(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
+        h_trans_seq, _             = generator(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
         
         d_ori = cnn(h_ori_seq)
         d_trans = cnn(h_trans_seq)
