@@ -172,8 +172,8 @@ class TestModules(unittest.TestCase):
         h_ori_seq, predictions_ori = generator_kor(z_kor, labels_kor, sample_kor, sample_kor_len, transfered = False)
         h_trans_seq, _             = generator_kor(z_eng, labels_kor, sample_kor, sample_kor_len, transfered = True)
         
-        h_ori_seq = torch.permutation(1,0,2)
-        h_trans_eq = torch.permutation(1,0,2)
+        h_ori_seq = torch.permute(1,0,2)
+        h_trans_eq = torch.permute(1,0,2)
 
         d_ori = cnn(h_ori_seq)
         d_trans = cnn(h_trans_seq)
