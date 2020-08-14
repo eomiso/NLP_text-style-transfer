@@ -119,7 +119,7 @@ class TestModules(unittest.TestCase):
         sample, sample_len = sample
         labels = torch.ones(self.batch_size)
 
-        encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
+        encoder = Encoder(self.embed_dim, self.dim_y, self.dim_z, self.dropout)
         
         z = encoder(labels, self.embedding_eng(sample), sample_len)
         assert z.shape == torch.Size((self.batch_size, self.dim_z))
@@ -133,7 +133,7 @@ class TestModules(unittest.TestCase):
         labels_kor = torch.zeros(self.batch_size)
         labels_eng = torch.ones(self.batch_size)
         
-        encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
+        encoder = Encoder(self.embed_dim, self.dim_y, self.dim_z, self.dropout)
         generator_kor = Generator(self.embedding_kor,self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
         
         z_kor = encoder(labels_kor, self.embedding_kor(sample_kor), sample_kor_len)
@@ -156,7 +156,7 @@ class TestModules(unittest.TestCase):
         labels_kor = torch.zeros(self.batch_size)
         labels_eng = torch.ones(self.batch_size)
         
-        encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
+        encoder = Encoder(self.embed_dim, self.dim_y, self.dim_z, self.dropout)
         generator_kor = Generator(self.embedding_kor,self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
         
         # arguments for textCNN

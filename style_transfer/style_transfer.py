@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from options import load_arguments
 class Encoder(nn.Module):
-    def __init__(self, batch_size, embed_dim, dim_y, dim_z, dropout):
+    def __init__(self,embed_dim, dim_y, dim_z, dropout):
         """
         Required parameters:
             batch_size:
@@ -15,7 +15,7 @@ class Encoder(nn.Module):
         """
         super().__init__()
         self.fc = nn.Linear( 1, dim_y) # output: (batch_size, dim_y)
-        self.init_z = torch.zeros(batch_size, dim_z)
+        self.init_z = torch.zeros(dim_z)
 
         self.rnn = nn.GRU(embed_dim, dim_y + dim_z,num_layers=1, dropout=dropout)
         self.dim_y = dim_y
@@ -26,6 +26,7 @@ class Encoder(nn.Module):
         
         # initial hidden state of the encoder :cat ( y, z)
         # QUESTION: y를 만드는 linear fuction 의 파라미터도 학습의 대상이 되는게 맞겠지?
+        self.init_z = self.init_z.repeat(src.shape[1], 1) # [ batch size: src.shape[1] , dim_z ]
         init_hidden = torch.cat((self.fc(labels), self.init_z), -1) 
         _, hidden = self.rnn(packed_embed, init_hidden.unsqueeze(0))
         # hidden : hidden_state of the final time step
@@ -168,11 +169,12 @@ class TextCNN(nn.Module):
         return self.fc(cat)
 
 def train(*models, iterator_0, iterator_1, epochs=20, lr=1e-3):
-
-def evaluate(models, iterator_0, iterator_1, )
+    pass
+def evaluate(*models, iterator_0, iterator_1, ):
+    pass
 
 if __name__ == "__main__":
     args = load_arguments()
-    """
-    TODO : should the number of batches equal
-    """
+
+    # TODO: Get iterators from bucketIterator
+    
