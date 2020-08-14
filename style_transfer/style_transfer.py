@@ -33,7 +33,7 @@ class Encoder(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, batch_size, embed_dim, dim_y, dim_z, dropout, temperature):
+    def __init__(self, batch_size, embedding, embed_dim, dim_y, dim_z, dropout, temperature):
         """
         Required Parameters:
             all the same exept "z" which is the output from the Encoder
@@ -43,6 +43,7 @@ class Generator(nn.Module):
         self.dim_h = dim_y + dim_z
 
         self.batch_size = batch_size
+        self.embedding = embedding
 
         self.fc = nn.Linear(1, dim_y)
         # The hidden state's dimension: dim_y + dim_z
@@ -50,7 +51,7 @@ class Generator(nn.Module):
         # ISSUE : 두 개의 fc_out 이 필요한 것인가 -> 원본 코드에서는 동일한 vocab을 공유하는 듯 하다.
         self.fc_out = nn.Linear(self.dim_h, self.embedding.num_embeddings) 
 
-    def forward(self, z, labels, embeddings, src, src_len, transfered = True):
+    def forward(self, z, labels, src, src_len, transfered = True):
         """
         Required Parameters
             z : output from the encoder
@@ -77,10 +78,10 @@ class Generator(nn.Module):
             for t in range(1, src_len): 
                 output, hidden = self.rnn(input, hidden)
                 outputs[t] = output
-                prediction = self.fc_out(output)
+                prediction = self.fc_out(output) # TODO: 두 개의 다른언어일 경우에 vocab, embeddings 가 각각 2개이고 그 결과 generator도 2개가 있어야 한다. 
                 predictions[t] = prediction
                 # 원본코드의 softsample_word를 참조
-                input = (F.gumbel_softmax(prediction) / self.gamma) * embeddings.weight
+                input = (F.gumbel_softmax(prediction) / self.gamma) * self.embedding.weight
             
 
         else:

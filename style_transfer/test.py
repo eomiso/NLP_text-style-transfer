@@ -1,5 +1,5 @@
 import unittest
-from style_transfer import Encoder
+from style_transfer import *
 import requests
 
 import os
@@ -116,6 +116,7 @@ class TestModules(unittest.TestCase):
 
     def test_encoder(self):
         sample, sample_len = next(iter(self.train_iterator_eng))
+        sample, sample_len = sample
         labels = torch.ones(self.batch_size)
 
         encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
@@ -125,8 +126,10 @@ class TestModules(unittest.TestCase):
 
     def test_generator(self):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
+        sample_kor, sample_kor_len = sample_kor
         sample_eng, sample_eng_len = next(iter(self.train_iterator_eng))
-        
+        sample_eng, sample_kor_len = sample_eng
+
         labels_kor = torch.zeros(self.batch_size)
         labels_eng = torch.ones(self.batch_size)
         
@@ -146,8 +149,10 @@ class TestModules(unittest.TestCase):
 
     def test_textCNN(self):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
+        sample_kor, sample_kor_len = sample_kor
         sample_eng, sample_eng_len = next(iter(self.train_iterator_eng))
-        
+        sample_eng, sample_kor_len = sample_eng
+
         labels_kor = torch.zeros(self.batch_size)
         labels_eng = torch.ones(self.batch_size)
         
