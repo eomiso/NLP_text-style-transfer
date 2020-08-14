@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from options import load_arguments
 class Encoder(nn.Module):
-    def __init__(self,embed_dim, dim_y, dim_z, dropout):
+    def __init__(self, embed_dim, dim_y, dim_z, dropout):
         """
         Required parameters:
             batch_size:
@@ -11,6 +11,12 @@ class Encoder(nn.Module):
             dim_y: 
             dim_z: 
             embed_dim:
+        
+        구성요소:
+            word_embedding을 포함하지 않는 이유: 하나의 encoder를 유지하기 위해(test code를 eng - kor 데이터로 짜다 보니까 이렇게 되었음..)
+            yolo 데이터로 코드 바꿀 예정
+            Fully connected Layer
+            unidirectional GRU
             
         """
         super().__init__()
@@ -36,9 +42,7 @@ class Encoder(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, embedding, embed_dim, dim_y, dim_z, dropout, temperature, idx_sos=torch.tensor([2], dtype=int)):
-        #TODO: self.Generator 생성시에 embedding을 넣어주면 embed_dim을 넣어줄 필요가 없다. generator 개수가 여러개여도 되는지 논의해보고 결정
-        """
+    """
         Required parameters:
             embedding: nn.Embedding()
             embed_dim: dimension of embedding (repetition, could be erased if necessary)
@@ -47,7 +51,15 @@ class Generator(nn.Module):
             dropout: refer to the paper
             temperature: refer to the paper
             idx_sos: TEXT.vocab['<sos>'] set to torch.tensor([2], dtype=int) as default
-        """
+        
+        Components:
+            Word Embedding : generator의 경우에는 여러개가 있어도 괜찮을 듯?
+            Unidirectional GRU
+            Fully connected Layer (prediction)
+    """
+    def __init__(self, embedding, embed_dim, dim_y, dim_z, dropout, temperature, idx_sos=torch.tensor([2], dtype=int)):
+        #TODO: self.Generator 생성시에 embedding을 넣어주면 embed_dim을 넣어줄 필요가 없다. generator 개수가 여러개여도 되는지 논의해보고 결정
+        
         super().__init__() 
         self.gamma = temperature
         self.dim_h = dim_y + dim_z
@@ -111,8 +123,9 @@ class Generator(nn.Module):
                 prediction = self.fc_out(output)
                 predictions[t] = prediction # predictions are for calculating loss_rec
                 input = self.embedding(src[t]).unsqueeze(0)
-        # outputs = [ sequence_len, batch_size, hidden_size]
+        
         outputs = torch.cat((h0.unsqueeze(0), outputs), 0) # according to the paper you need h0 in the sequence to feed the discriminator
+        # outputs = [ sequence_len, batch_size, hidden_size]
 
         return outputs, predictions
 
@@ -158,7 +171,7 @@ class TextCNN(nn.Module):
         #hiddens = [batch_size, 1, hiddens seq len, dim_h]
 
         conved = [F.leaky_relu(conv(hiddens)).squeeze(3) for conv in self.convs]
-        #conved[n] = [batch size, n_filters, dim_h - filter_sizez[n] + 1]
+        #conved[n] = [batch size, n_filters, dim_h - filter_sizes[n] + 1]
 
         pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
         #pooled[n] = [batch size, n_filters]
@@ -168,6 +181,37 @@ class TextCNN(nn.Module):
 
         return self.fc(cat)
 
+
+class Transfer(nn.Module):
+    def __init__(self, embeddings, embed_dim, dim_y, dim_z, dropout, 
+                 n_filters, filter_sizes, output_dim, pad_idx=1, sos_idx=2):
+        super().__init__()
+        self.embeddings = nn.Embedding(vocab_size, embed_dim).pretrained(embeddings)
+        self.encoder = Encoder(embed_dim, dim_y, dim_z, dropout)
+        self.generator = Generator(self.embedding, embed_dim, dim_y, dim_z, dropout, temperature, idx_sos=sos_idx)
+        self.criterion_rec = nn.CrossEntropyLoss(ignore_index=pad_idx)
+        self.discriminator_0 = Discriminator(dim_y+dim_z, n_filters, filter_sizes, output_dim, dropout)
+        self.discriminator_1 = Discriminator(dim_y+dim_z, n_filters, filter_sizes, output_dim, dropout)
+        
+
+    def forward(self, text_0, text_0_len, text_1, text_1_len):
+        labels_0 = torch.zeros(text_0_len.shape[1])
+        labels_1 = torch.ones(text_1_len.shape[1])
+
+        z_0 = self.encoder(labels_0, self.embeddings(text_0), text_0_len)
+        z_1 = self.encoder(labels_1, self.embeddings(text_1), text_1_len)
+
+        h_ori_seq_0, predictions_ori_0 = generator(z_0, labels_0, sample_0, sample_0_len, transfered=False)
+        h_trans_seq_1, _  = generator(z_1, labels_1, sample_0, sample_0_len, transfered=True)
+
+        h_ori_seq_1, predictions_ori_1 = generator(z_1, labels_1, sample_1, sample_1_len, transfered=False)
+        h_trans_seq_0, _  = generator(z_0, labels_0, sample_1, sample_1_len, transfered=True)
+
+        # TODO Discriminator
+
+        return loss_rec, loss_adv
+
+
 def train(*models, iterator_0, iterator_1, epochs=20, lr=1e-3):
     tmp = "Epoch: {:3d} | Time:{:.4f} ms | Loss_rec: {:4.f} | loss_adv: {:.4f}"
     for epoch in range(epochs):
@@ -175,13 +219,12 @@ def train(*models, iterator_0, iterator_1, epochs=20, lr=1e-3):
 
     pass
 def evaluate(*models, iterator_0, iterator_1):
-    
+
     pass
 
 if __name__ == "__main__":
     args = load_arguments()
 
-    generator
-
     # TODO: Get iterators from bucketIterator
-    
+
+    #    
