@@ -128,7 +128,7 @@ class TestModules(unittest.TestCase):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
         sample_kor, sample_kor_len = sample_kor
         sample_eng, sample_eng_len = next(iter(self.train_iterator_eng))
-        sample_eng, sample_kor_len = sample_eng
+        sample_eng, sample_eng_len = sample_eng
 
         labels_kor = torch.zeros(self.batch_size)
         labels_eng = torch.ones(self.batch_size)
@@ -140,8 +140,8 @@ class TestModules(unittest.TestCase):
         z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
         
 
-        h_ori_seq, predictions_ori = generator(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
-        h_trans_seq, _             = generator(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
+        h_ori_seq, predictions_ori = generator(z_kor, labels_kor, sample_kor, sample_kor_len, transfered = False)
+        h_trans_seq, _             = generator(z_eng, labels_kor, sample_kor, sample_kor_len, transfered = True)
 
         assert h_ori_seq.shape == torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z))
         assert h_trans_seq.shape == torch.Size((len(sample_kor)+1, self.batch_size, self.dim_y+self.dim_z))
@@ -151,7 +151,7 @@ class TestModules(unittest.TestCase):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
         sample_kor, sample_kor_len = sample_kor #docker 환경(python 3.8.5)에서 돌리면 tuple이 자꾸 sample_kor에 들어가버린다.
         sample_eng, sample_eng_len = next(iter(self.train_iterator_eng))
-        sample_eng, sample_kor_len = sample_eng
+        sample_eng, sample_eng_len = sample_eng
 
         labels_kor = torch.zeros(self.batch_size)
         labels_eng = torch.ones(self.batch_size)
@@ -169,8 +169,8 @@ class TestModules(unittest.TestCase):
         z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
         
 
-        h_ori_seq, predictions_ori = generator(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
-        h_trans_seq, _             = generator(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
+        h_ori_seq, predictions_ori = generator_kor(z_kor, labels_kor, sample_kor, sample_kor_len, transfered = False)
+        h_trans_seq, _             = generator_kor(z_eng, labels_kor, sample_kor, sample_kor_len, transfered = True)
         
         d_ori = cnn(h_ori_seq)
         d_trans = cnn(h_trans_seq)
