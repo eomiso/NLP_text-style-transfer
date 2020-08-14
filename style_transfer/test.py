@@ -145,7 +145,7 @@ class TestModules(unittest.TestCase):
 
         assert h_ori_seq.shape == torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z))
         assert h_trans_seq.shape == torch.Size((len(sample_kor)+1, self.batch_size, self.dim_y+self.dim_z))
-        assert predictions_ori == torch.Size((len(sample_kor),self.batch_size,self.embedding_kor.num_embeddings))
+        assert predictions_ori.shape == torch.Size((len(sample_kor),self.batch_size,self.embedding_kor.num_embeddings))
 
     def test_textCNN(self):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
@@ -175,8 +175,8 @@ class TestModules(unittest.TestCase):
         d_ori = cnn(h_ori_seq)
         d_trans = cnn(h_trans_seq)
 
-        assert d_ori.size == torch.Size((self.batch_size, output_dim))
-        assert d_trans.size == torch.Size((self.batch_size, output_dim))
+        assert d_ori.shape == torch.Size((self.batch_size, output_dim))
+        assert d_trans.shape == torch.Size((self.batch_size, output_dim))
 
     def test_discriminator(self):
         pass

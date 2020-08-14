@@ -77,13 +77,13 @@ class Generator(nn.Module):
             input = self.embedding(self.index_sos).repeat(self.batch_size, 1) # <go> or <sos> # batch size 만큼 늘리기
             input = input.unsqueeze(0)
             hidden = h0.unsqueeze(0) # [num_layers * num_directions = 1, batch, hidden_size]
-            for t in range(1, src_len): 
+            for t in range(1, max(src_len)): #TODO: src_len 는 tensor 이기 때문에 그중에 가장 큰것만 사용 
                 output, hidden = self.rnn(input, hidden)
                 outputs[t] = output
                 prediction = self.fc_out(output) # TODO: 두 개의 다른언어일 경우에 vocab, embeddings 가 각각 2개이고 그 결과 generator도 2개가 있어야 한다. 
                 predictions[t] = prediction
                 # 원본코드의 softsample_word를 참조
-                input = (F.gumbel_softmax(prediction) / self.gamma) * self.embedding.weight
+                input = torch.matmul(F.gumbel_softmax(prediction) / self.gamma, self.embedding.weight)
             
 
         else:
