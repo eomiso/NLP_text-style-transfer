@@ -102,7 +102,7 @@ class TestModules(unittest.TestCase):
         self.embedding_eng = nn.Embedding(len(ENG.vocab),self.embed_dim)
 
         self.train_iterator_kor = data.BucketIterator(
-            train_data_eng, 
+            train_data_kor, 
             batch_size=self.batch_size,
             sort_within_batch=True,
             sort_key=lambda x : len(x.korean),
@@ -140,9 +140,9 @@ class TestModules(unittest.TestCase):
         h_ori_seq, predictions_ori = generator(z_kor, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = False)
         h_trans_seq, _             = generator(z_eng, labels_kor, self.embedding_kor, sample_kor, sample_kor_len, transfered = True)
 
-        assert h_ori_seq.shape = torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z))
-        assert h_trans_seq.shape = torch.Size((len(sample_kor)+1, self.batch_size, self.dim_y+self.dim_z))
-        assert predictions_ori = torch.Size((len(sample_kor),self.batch_size,self.embedding_kor.num_embeddings))
+        assert h_ori_seq.shape == torch.Size((len(sample_kor)+1,self.batch_size, self.dim_y+self.dim_z))
+        assert h_trans_seq.shape == torch.Size((len(sample_kor)+1, self.batch_size, self.dim_y+self.dim_z))
+        assert predictions_ori == torch.Size((len(sample_kor),self.batch_size,self.embedding_kor.num_embeddings))
 
     def test_textCNN(self):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
