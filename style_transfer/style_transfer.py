@@ -35,11 +35,10 @@ class Encoder(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, batch_size, embedding, embed_dim, dim_y, dim_z, dropout, temperature, idx_sos=torch.tensor([2], dtype=int)):
+    def __init__(self, embedding, embed_dim, dim_y, dim_z, dropout, temperature, idx_sos=torch.tensor([2], dtype=int)):
         #TODO: self.Generator 생성시에 embedding을 넣어주면 embed_dim을 넣어줄 필요가 없다. generator 개수가 여러개여도 되는지 논의해보고 결정
         """
         Required parameters:
-            batch_size: .
             embedding: nn.Embedding()
             embed_dim: dimension of embedding (repetition, could be erased if necessary)
             dim_y: .
@@ -52,7 +51,6 @@ class Generator(nn.Module):
         self.gamma = temperature
         self.dim_h = dim_y + dim_z
 
-        self.batch_size = batch_size
         self.embedding = embedding
         self.index_sos = idx_sos # to feed <sos> when generating a transfered text
 

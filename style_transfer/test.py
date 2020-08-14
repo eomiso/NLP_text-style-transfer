@@ -134,7 +134,7 @@ class TestModules(unittest.TestCase):
         labels_eng = torch.ones(self.batch_size)
         
         encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
-        generator_kor = Generator(self.batch_size, self.embedding_kor,self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
+        generator_kor = Generator(self.embedding_kor,self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
         
         z_kor = encoder(labels_kor, self.embedding_kor(sample_kor), sample_kor_len)
         z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
@@ -157,7 +157,7 @@ class TestModules(unittest.TestCase):
         labels_eng = torch.ones(self.batch_size)
         
         encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
-        generator_kor = Generator(self.batch_size, self.embedding_kor,self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
+        generator_kor = Generator(self.embedding_kor,self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
         
         # arguments for textCNN
         n_filters = 5
