@@ -134,7 +134,7 @@ class TestModules(unittest.TestCase):
         labels_eng = torch.ones(self.batch_size)
         
         encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
-        generator = Generator(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
+        generator_kor = Generator(self.batch_size, self.embedding_kor,self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
         
         z_kor = encoder(labels_kor, self.embedding_kor(sample_kor), sample_kor_len)
         z_eng = encoder(labels_eng, self.embedding_eng(sample_eng), sample_eng_len)
@@ -149,7 +149,7 @@ class TestModules(unittest.TestCase):
 
     def test_textCNN(self):
         sample_kor, sample_kor_len = next(iter(self.train_iterator_kor))
-        sample_kor, sample_kor_len = sample_kor
+        sample_kor, sample_kor_len = sample_kor #docker 환경(python 3.8.5)에서 돌리면 tuple이 자꾸 sample_kor에 들어가버린다.
         sample_eng, sample_eng_len = next(iter(self.train_iterator_eng))
         sample_eng, sample_kor_len = sample_eng
 
@@ -157,7 +157,7 @@ class TestModules(unittest.TestCase):
         labels_eng = torch.ones(self.batch_size)
         
         encoder = Encoder(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout)
-        generator = Generator(self.batch_size, self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
+        generator_kor = Generator(self.batch_size, self.embedding_kor,self.embed_dim, self.dim_y, self.dim_z, self.dropout, self.temperature)
         
         # arguments for textCNN
         n_filters = 5

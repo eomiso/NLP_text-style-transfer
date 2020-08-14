@@ -34,6 +34,7 @@ class Encoder(nn.Module):
 
 class Generator(nn.Module):
     def __init__(self, batch_size, embedding, embed_dim, dim_y, dim_z, dropout, temperature):
+        #TODO: self.Generator 생성시에 embedding을 넣어주면 embed_dim을 넣어줄 필요가 없다. generator 개수가 여러개여도 되는지 논의해보고 결정
         """
         Required Parameters:
             all the same exept "z" which is the output from the Encoder
