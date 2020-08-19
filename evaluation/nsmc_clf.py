@@ -76,11 +76,8 @@ class NSMC(Dataset):
         labels = self.labels[idx]
         
         text_tokens = self.tokenizer.encode(text)
-        input_ids = self.tokenizer.build_inputs_with_special_tokens(text_tokens)
-        # returns [CLS] X [SEP] (https://huggingface.co/transformers/model_doc/bert.html#transformers.BertTokenizer.build_inputs_with_special_tokens)
-        input_ids = input_ids[:self.maxlen-1] + input_ids[-1:]  # must always include [SEP] at the end
         
-        return torch.LongTensor(input_ids), labels
+        return torch.LongTensor(text_tokens), labels
         
         
 def collate_fn(data):
