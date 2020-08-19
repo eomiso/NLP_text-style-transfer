@@ -1,9 +1,26 @@
 import sys
 import argparse
 import pprint
+import os.path
 
 def load_arguments():
     argparser = argparse.ArgumentParser(sys.argv[0])
+
+    arparser.add_argument('--cuda_num',
+            requited=True
+            help="The device number you would like to use. Check nvidia-smi before choosing",
+            type=int)
+
+
+    argparser.add_argument('--path_0', 
+            required=True,
+            help="first input file as the second domain",
+            type=str)
+
+    argparser.add_argument('--path_1', 
+            required=True,
+            help="second input file as the second domain",
+            type=str)
 
     argparser.add_argument('--train',
             type=str,
@@ -14,7 +31,10 @@ def load_arguments():
     argparser.add_argument('--test',
             type=str,
             default='')
-    argparser.add_argument('--output', # output path
+    argparser.add_argument('--online_testing',
+            type=bool,
+            default=False)
+    argparser.add_argument('--output',
             type=str,
             default='')
     argparser.add_argument('--vocab',
@@ -91,9 +111,9 @@ def load_arguments():
 
     args = argparser.parse_args()
 
-    print ('------------------------------------------------')
+    print '------------------------------------------------'
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(vars(args))
-    print ('------------------------------------------------')
+    print '------------------------------------------------'
 
     return args
