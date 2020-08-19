@@ -110,7 +110,7 @@ def train(model: Transfer, iterator_0, iterator_1, epochs=20, lr=1e-3, lambda_=1
         start_time = time.time()
 
         avg_total_loss = 0
-        for batch_0, batch_1 in tqdm(zip(iterator_0, iterator_1), total=len(iterator_0)):
+        for batch_0, batch_1 in zip(iterator_0, iterator_1), total=len(iterator_0):
             text_0, text_0_len = batch_0.text0
             text_1, text_1_len = batch_1.text1
 
