@@ -93,10 +93,10 @@ def get_dataloader_for_train_and_val(txt_path, tokenizer, maxlen=256, valid_size
     val_ds1 = Subset(ds1, split['valid'])
     
     train_dataloader0 = DataLoader(train_ds0, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, drop_last=drop_last, collate_fn=get_collate_fn(tokenizer))
-    val_dataloader0 = DataLoader(val_ds0, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=False, collate_fn=get_collate_fn(tokenizer))
+    val_dataloader0 = DataLoader(val_ds0, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True, collate_fn=get_collate_fn(tokenizer))
     
     train_dataloader1 = DataLoader(train_ds1, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, drop_last=drop_last, collate_fn=get_collate_fn(tokenizer))
-    val_dataloader1 = DataLoader(val_ds1, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=False, collate_fn=get_collate_fn(tokenizer))
+    val_dataloader1 = DataLoader(val_ds1, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True, collate_fn=get_collate_fn(tokenizer))
     
     return train_dataloader0, train_dataloader1, val_dataloader0, val_dataloader1
         
@@ -105,8 +105,8 @@ def get_dataloader_for_test(txt_path, tokenizer, maxlen=256, batch_size=16, num_
     ds0 = NSMCStyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=0)
     ds1 = NSMCStyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=1)
     
-    dataloader0 = DataLoader(ds0, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=get_collate_fn(tokenizer))
-    dataloader1 = DataLoader(ds0, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=get_collate_fn(tokenizer))
+    dataloader0 = DataLoader(ds0, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True, collate_fn=get_collate_fn(tokenizer))
+    dataloader1 = DataLoader(ds0, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True, collate_fn=get_collate_fn(tokenizer))
     
     return dataloader0, dataloader1
 
