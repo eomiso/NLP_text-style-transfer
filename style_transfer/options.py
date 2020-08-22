@@ -44,7 +44,7 @@ argparser.add_argument('--dim_emb',
 argparser.add_argument('--filter_sizes',
                        type=int,
                        nargs='+',
-                       default=[1,2,3])
+                       default=[1,2,3,4,5])
 argparser.add_argument('--n_filters',
                        type=int,
                        default=128)

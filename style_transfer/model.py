@@ -145,7 +145,8 @@ class Discriminator(nn.Module):
         #self.criterion_adv = nn.BCELoss()
     
     def forward(self, h_sequence):
-        return self.cnn(h_sequence)
+        # h_sequence: [seq_len, batch_size, hidden_dim]
+        return self.cnn(h_sequence.transpose(0, 1))
 
 
 class TextCNN(nn.Module):

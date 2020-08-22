@@ -87,8 +87,6 @@ def train():
             loss_disc_avg_meter.update(loss_disc.item(), src_0.size(0)) # log
             
             # train embedding/encoder/generator
-            print(prediction_ori_0.shape)
-            print(src_0[1:].shape)
             loss_rec = 0.5 * (F.cross_entropy(prediction_ori_0.view(-1, prediction_ori_0.size(-1)), src_0[1:].view(-1), ignore_index=kobert_tokenizer.pad_token_id) + \
                               F.cross_entropy(prediction_ori_1.view(-1, prediction_ori_0.size(-1)), src_1[1:].view(-1), ignore_index=kobert_tokenizer.pad_token_id))
 
