@@ -59,10 +59,10 @@ def train():
             z_1 = encoder(labels_1, src_1, src_len_1)
             
             h_ori_seq_0, prediction_ori_0 = generator(z_0, labels_0, src_0, src_len_0, transfered=False)
-            h_trans_seq_0_to_1, _ = generator(z_0, labels_0, src_1, src_len_1, transfered=True)
+            h_trans_seq_0_to_1, _ = generator(z_0, labels_0, src_1, src_len_1, transfered=True) # transfered from 0 to 1
             
             h_ori_seq_1, prediction_ori_1 = generator(z_1, labels_1, src_1, src_len_1, transfered=False)
-            h_trans_seq_1_to_0, _ = generator(z_1, labels_1, src_0, src_len_0, transfered=True)
+            h_trans_seq_1_to_0, _ = generator(z_1, labels_1, src_0, src_len_0, transfered=True) # transfered from 1 to 0
             
             # train discriminator
             d_0_real, d_0_fake = discriminator_0(h_ori_seq_0.detach()), discriminator_0(h_trans_seq_1_to_0.detach())
@@ -195,7 +195,7 @@ def train():
                 loss_adv_avg_meter.update(loss_adv.item(), src_0.size(0))
                 
         progress_meter.display(len(val_dataloader_0))
-        val_loss = loss_rec_avg_meter.avg + loss_adv_avg_meter
+        val_loss = loss_rec_avg_meter.avg + loss_adv_avg_meter.avg
         if val_loss < best_val_loss:
             print("Best Val Loss, saving checkpoint")
             save_checkpoint(embedding, encoder, generator, discriminator_0, discriminator_1, path=args.ckpt_path)
