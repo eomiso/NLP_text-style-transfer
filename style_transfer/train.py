@@ -173,8 +173,8 @@ def train():
                 loss_disc_avg_meter.update(loss_disc.item(), src_0.size(0)) # log
                 
                 # get generator loss
-                loss_rec = 0.5 * (F.cross_entropy(prediction_ori_0, src_0, ignore_index=kobert_tokenizer.pad_token_id) + \
-                                F.cross_entropy(prediction_ori_1, src_1, ignore_index=kobert_tokenizer.pad_token_id))
+                loss_rec = 0.5 * (F.cross_entropy(prediction_ori_0.view(-1, prediction_ori_0.size(-1)), src_0[1:].view(-1), ignore_index=kobert_tokenizer.pad_token_id) + \
+                              F.cross_entropy(prediction_ori_1.view(-1, prediction_ori_0.size(-1)), src_1[1:].view(-1), ignore_index=kobert_tokenizer.pad_token_id))
 
                 if args.gan_type == 'vanilla':
                     loss_adv_0 = F.binary_cross_entropy_with_logits(d_0_fake, torch.ones_like(d_0_fake))
