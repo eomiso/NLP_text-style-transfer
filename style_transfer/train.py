@@ -52,6 +52,9 @@ def train():
         for ix, ((src_0, src_len_0, labels_0), (src_1, src_len_1, labels_1)) in enumerate(zip(train_dataloader_0, train_dataloader_1)):
             start_time = time.time()
             
+            src_0, src_len_0, labels_0 = src_0.to(device), src_len_0.to(device), labels_0.to(device)
+            src_1, src_len_1, labels_1 = src_1.to(device), src_len_1.to(device), labels_1.to(device)
+            
             z_0 = encoder(labels_0, src_0, src_len_0)  # (batch_size, dim_z)
             z_1 = encoder(labels_1, src_1, src_len_1)
             
@@ -134,6 +137,10 @@ def train():
         
         for ix, ((src_0, src_len_0, labels_0), (src_1, src_len_1, labels_1)) in enumerate(zip(val_dataloader_0, val_dataloader_1)):
             with torch.no_grad():
+                
+                src_0, src_len_0, labels_0 = src_0.to(device), src_len_0.to(device), labels_0.to(device)
+                src_1, src_len_1, labels_1 = src_1.to(device), src_len_1.to(device), labels_1.to(device)
+                
                 z0 = encoder(labels_0, src_0, src_len_0)  # (batch_size, dim_z)
                 z1 = encoder(labels_1, src_1, src_len_1)
                 
