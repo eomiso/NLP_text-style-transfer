@@ -41,6 +41,7 @@ class NSMCStyleTransfer(Dataset):
 
         return torch.LongTensor(text_tokens), labels
     
+    
 def get_collate_fn(tokenizer):
     pad_value = tokenizer.pad_token_id
 

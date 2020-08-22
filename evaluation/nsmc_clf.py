@@ -75,7 +75,7 @@ class NSMC(Dataset):
         text = self.texts[idx]
         labels = self.labels[idx]
         
-        input_ids = self.tokenizer.encode(text, add_special_tokens=True)
+        input_ids = self.tokenizer.encode(text, add_special_tokens=True) # add [CLS] at the beginning and [SEP] at the end
         input_ids = input_ids[:min(len(input_ids), self.maxlen)-1] + input_ids[-1:]  # must always include [SEP] at the end
         
         return torch.LongTensor(input_ids), labels
