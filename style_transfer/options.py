@@ -8,15 +8,13 @@ from utils import str2bool
 argparser = argparse.ArgumentParser(sys.argv[0])
 
 
-
 argparser.add_argument('--ckpt_path',
                        required=True,
                        help="path to save/load checkpoint",
                        type=str)
 
 # dataloading
-argparser.add_argument('--text_file_path', 
-                       required=True,
+argparser.add_argument('--text_file_path',
                        type=str)
 argparser.add_argument('--batch_size',
                        type=int,
@@ -59,6 +57,9 @@ argparser.add_argument('--weight_decay',
 argparser.add_argument('--lr',
                        type=float,
                        default=5e-4)
+argparser.add_argument('--disc_lr',
+                       type=float,
+                       default=5e-5)
 argparser.add_argument("--temperature",
                        type=float,
                        default=0.1)
@@ -74,6 +75,24 @@ argparser.add_argument('--gan_type',
 argparser.add_argument('--log_interval',
                        default=100,
                        type=int)
+
+# testing
+argparser.add_argument('--test_text_path',
+                       help='path to text file whose each line contains one sentence',
+                       default=None)
+argparser.add_argument('--transfer_to',
+                       default=1,
+                       type=int,
+                       choices=[0, 1])
+argparser.add_argument('--transfer_max_len',
+                       default=64,
+                       type=int)
+argparser.add_argument("--transfer_result_save_path",
+                       default=None,
+                       help="path to save transfer result")
+argparser.add_argument('--test_recon',
+                       default=False,
+                       type=str2bool)
 
 # others
 argparser.add_argument("--cuda_device",

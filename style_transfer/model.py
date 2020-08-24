@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.distributions import Categorical
 import torch.nn.functional as F
 from tqdm import tqdm
 
@@ -80,7 +81,35 @@ class Generator(nn.Module):
         self.fc_out = nn.Linear(self.dim_h, self.embed.num_embeddings) # prediction
         
         self.use_gumbel = use_gumbel
+        
+    def transfer(self, z, label_to_transfer_to, eos_token_id=8003, max_len=64, top_k=5):
+        label = label_to_transfer_to
+        assert z.size(0) == 1 and label.size(0) == 1
+        label = label.unsqueeze(-1)
+        
+        h0 = torch.cat((self.fc(label), z), -1)  # (1, dim_h)
+        
+        input = self.embed(self.bos_token_id).repeat(1, 1).unsqueeze(0)  # (1, 1, embed_dim)
+        hidden = h0.unsqueeze(0)  # (1, 1, dim_h)
+        
+        predictions = []
+        for t in range(max_len):
+            output, hidden = self.rnn(input, hidden)
+            prediction = self.fc_out(output)  # (1, 1, num_embedding)
+            
+            top_k_logits = prediction.topk(top_k).values
+            top_k_indices = prediction.topk(top_k).indices
+            
+            sample = Categorical(logits=top_k_logits).sample().item()
+            prediction = top_k_indices[:, :, sample]  # (1, 1)
+            predictions.append(prediction.item())
+            if prediction == eos_token_id:
+                break
 
+            input = self.embed(prediction)  # (1, 1, embed_dim)
+            
+        return predictions
+        
     def forward(self, z, labels, src, src_len, transfered = True):
         """
         Required Parameters

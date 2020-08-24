@@ -32,7 +32,7 @@ def train():
     optimizer = optim.Adam(list(embedding.parameters()) + list(encoder.parameters()) + list(generator.parameters()),
                            lr=args.lr, weight_decay=args.weight_decay)
     disc_optimizer = optim.Adam(list(discriminator_0.parameters()) + list(discriminator_1.parameters()),
-                                lr=args.lr, weight_decay=args.weight_decay)  
+                                lr=args.disc_lr, weight_decay=args.weight_decay)  
     
     best_val_loss = np.inf
     
@@ -120,8 +120,8 @@ def train():
             
             time_avg_meter.update(time.time() - start_time)
             
-            if (ix + 1) % args.log_interval == 0:
-                progress_meter.display(ix + 1)
+            if (ix) % args.log_interval == 0:
+                progress_meter.display(ix)
                 
         progress_meter.display(len(train_dataloader_0))
                 
@@ -197,6 +197,7 @@ def train():
         progress_meter.display(len(val_dataloader_0))
         val_loss = loss_rec_avg_meter.avg + loss_adv_avg_meter.avg
         if val_loss < best_val_loss:
+            best_val_loss = val_loss
             print("Best Val Loss, saving checkpoint")
             save_checkpoint(embedding, encoder, generator, discriminator_0, discriminator_1, path=args.ckpt_path)
                 
