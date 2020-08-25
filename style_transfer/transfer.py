@@ -15,9 +15,9 @@ def transfer():
     device = torch.device('cuda:{}'.format(args.cuda_device) if torch.cuda.is_available() else 'cpu')
     
     # 1. get model
-    embedding = get_kobert_word_embedding().to(device)
-    encoder = Encoder(embedding, args.dim_y, args.dim_z).to(device)
-    generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, kobert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel).to(device)
+    embedding = get_kobert_word_embedding().to(device).eval()
+    encoder = Encoder(embedding, args.dim_y, args.dim_z).to(device).eval()
+    generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, kobert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel).to(device).eval()
     
     # 2. load checkpoint
     ckpt = torch.load(args.ckpt_path, map_location=device)

@@ -22,9 +22,6 @@ argparser.add_argument('--batch_size',
 argparser.add_argument('--max_seq_length',
                        type=int,
                        default=64)
-argparser.add_argument('--val_ratio',
-                       type=float,
-                       default=0.1)
 argparser.add_argument('--num_workers',
                        type=int,
                        default=4)
