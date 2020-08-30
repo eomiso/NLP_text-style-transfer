@@ -95,7 +95,7 @@ def get_dataloader_for_test(txt_path, tokenizer, maxlen=256, batch_size=16, num_
     ds1 = NSMCStyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=1)
     
     dataloader0 = DataLoader(ds0, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True, collate_fn=get_collate_fn(tokenizer))
-    dataloader1 = DataLoader(ds0, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True, collate_fn=get_collate_fn(tokenizer))
+    dataloader1 = DataLoader(ds1, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True, collate_fn=get_collate_fn(tokenizer))
     
     return dataloader0, dataloader1
 

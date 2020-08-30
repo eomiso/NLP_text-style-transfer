@@ -6,7 +6,7 @@ from torch.nn import functional as F
 import time
 import numpy as np
 
-from dataloader import kobert_tokenizer, get_dataloader_for_train_and_val
+from dataloader import kobert_tokenizer
 from model import Encoder, Generator, Discriminator, get_kobert_word_embedding
 from options import args
 
