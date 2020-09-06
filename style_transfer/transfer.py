@@ -9,6 +9,7 @@ import numpy as np
 #from dataloader import kobert_tokenizer
 from model import Encoder, Generator, Discriminator  #, get_kobert_word_embedding
 from options import args
+import torch.nn as nn
 from yelp_data_utils import *
 
 """
