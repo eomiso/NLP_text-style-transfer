@@ -20,9 +20,9 @@ from yelp_data_utils import *
 def transfer():
     device = torch.device('cuda:{}'.format(args.cuda_device) if torch.cuda.is_available() else 'cpu')
     
-    TEXT_field = load_vocab() # The torchtext.field should be on the same directory.
-    pad_token_id = TEXT_field.vocab.stoi('<pad>')
-    eos_token_id = TEXT_field.vocab.stoi('<eos>')
+    TEXT_field = load_field() # The torchtext.field should be on the same directory.
+    pad_token_id = TEXT_field.vocab.stoi['<pad>']
+    eos_token_id = TEXT_field.vocab.stoi['<eos>']
 
     # 1. get model
     embedding = nn.Embedding( list(TEXT_field.vocab.vectors.shape)).to(device).eval()

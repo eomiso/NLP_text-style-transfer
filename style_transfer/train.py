@@ -2,6 +2,7 @@
 import torch
 import torch.optim as optim
 from torch.nn import functional as F
+import torch.nn as nn
 import time
 import numpy as np
 
@@ -30,16 +31,16 @@ def train():
     
     device = torch.device('cuda:{}'.format(args.cuda_device) if torch.cuda.is_available() else 'cpu')
     
-
     # 1. get data
     # using torchtext
     (train_iter_0, val_iter_0, test_iter_0), (train_iter_1, val_iter_1, test_iter_1), \
-        TEXT_field = get_iterator_for_train_val_test(args.text_file_path, args.batch_size)
-    pad_token_id = TEXT_field.vocab.stoi('<pad>')
-    eos_token_id = TEXT_field.vocab.stoi('<eos>')
+        TEXT_field = get_iterator_for_train_val_test(args.text_file_path, args.batch_size, args.filter_sizes)
+    pad_token_id = TEXT_field.vocab.stoi['<pad>']
+    eos_token_id = TEXT_field.vocab.stoi['<eos>']
+    
     embedding = nn.Embedding(len(TEXT_field.vocab), 300).from_pretrained(TEXT_field.vocab.vectors, freeze=False,
                                                      padding_idx=pad_token_id).to(device) # glove.42B.300d -> vocab
-
+    print("Embedding Size: {}".format(len(TEXT_field.vocab)))
     # 2. get model
     encoder = Encoder(embedding, args.dim_y, args.dim_z).to(device)
     generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, eos_token_id, use_gumbel=args.use_gumbel).to(device)
@@ -69,7 +70,7 @@ def train():
         
         for ix, (batch_from_0, batch_from_1) in enumerate(zip(train_iter_0, train_iter_1)):
             start_time = time.time()
-            (src_0, src_len_0, labels_0), (src_1, src_1, src_len_1, labels_1) = set_labels(batch_from_0, batch_from_1)
+            (src_0, src_len_0, labels_0), (src_1, src_len_1, labels_1) = set_labels(batch_from_0, batch_from_1)
 
             src_0, labels_0 = src_0.to(device), labels_0.to(device)
             src_1, labels_1 = src_1.to(device), labels_1.to(device)
@@ -240,10 +241,10 @@ def save_checkpoint(embedding, encoder, generator, discriminator_0, discriminato
                 path)
 
 def set_labels(batch_0, batch_1):
-    src_0, src_len_0 = batch_from_0.src
-    src_1, src_len_1 = batch_from_1.src
-    labels_0 = torch.zeros(src_0.shape[0])
-    labels_1 = torch.ones(src_1.shape[0])
+    src_0, src_len_0 = batch_0.src
+    src_1, src_len_1 = batch_1.src
+    labels_0 = torch.zeros(src_len_0.shape[0])
+    labels_1 = torch.ones(src_len_1.shape[0])
 
     return (src_0, src_len_0, labels_0) , (src_1, src_len_1, labels_1)
 

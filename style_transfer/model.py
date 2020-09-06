@@ -135,7 +135,7 @@ class Generator(nn.Module):
             input = self.embed(self.bos_token_id).repeat(src.shape[1], 1)
             input = input.unsqueeze(0)                            # [1, batch_size, embed_dim]
             hidden = h0.unsqueeze(0)                              # [1, batch_size, hidden_size]
-            for t in range(1, max(src_len)):                      
+            for t in range(1, max(src_len)): 
                 output, hidden = self.rnn(input, hidden)
                 outputs.append(output)
                 prediction = self.fc_out(output)    
