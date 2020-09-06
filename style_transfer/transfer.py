@@ -26,7 +26,7 @@ def transfer():
     eos_token_id = TEXT_field.vocab.stoi['<eos>']
 
     # 1. get model
-    embedding = nn.Embedding( list(TEXT_field.vocab.vectors.shape)).to(device).eval()
+    embedding = nn.Embedding( *list(TEXT_field.vocab.vectors.shape)).to(device).eval()
     encoder = Encoder(embedding, args.dim_y, args.dim_z).to(device).eval()
     generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, eos_token_id, use_gumbel=args.use_gumbel).to(device).eval()
     
