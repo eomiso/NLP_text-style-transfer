@@ -2,5 +2,6 @@ __pycache__/
 *.pth
 *.pyc
 
+yelp_data/
 .DS_Store
 
