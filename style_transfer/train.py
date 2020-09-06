@@ -219,7 +219,7 @@ def train():
             loss_adv_avg_meter.update(loss_adv.item(), src_0.size(0))
 
         progress_meter.display(len(val_iter_0))
-        val_loss = loss_rec_avg_meter.avg + loss_adv_avg_meter
+        val_loss = loss_rec_avg_meter.avg + loss_adv_avg_meter.avg
         if val_loss < best_val_loss:
             print("Best Val Loss, saving checkpoint")
             save_checkpoint(embedding, encoder, generator, discriminator_0, discriminator_1, path=args.ckpt_path)
