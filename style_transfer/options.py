@@ -12,6 +12,7 @@ argparser.add_argument('--ckpt_path',
                        required=True,
                        help="path to save/load checkpoint",
                        type=str)
+                       #path should be given without / at the end
 
 # dataloading
 argparser.add_argument('--text_file_path',
