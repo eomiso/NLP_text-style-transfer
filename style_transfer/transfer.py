@@ -6,18 +6,28 @@ from torch.nn import functional as F
 import time
 import numpy as np
 
-from dataloader import kobert_tokenizer
-from model import Encoder, Generator, Discriminator, get_kobert_word_embedding
+#from dataloader import kobert_tokenizer
+from model import Encoder, Generator, Discriminator  #, get_kobert_word_embedding
 from options import args
+from yelp_data_utils import *
 
+"""
+변경사항
+1. TEXT_field 읽어오는 코드 추가. encode, decode를 위해서 필요
+2. 
+"""
 
 def transfer():
     device = torch.device('cuda:{}'.format(args.cuda_device) if torch.cuda.is_available() else 'cpu')
     
+    TEXT_field = load_vocab() # The torchtext.field should be on the same directory.
+    pad_token_id = TEXT_field.vocab.stoi('<pad>')
+    eos_token_id = TEXT_field.vocab.stoi('<eos>')
+
     # 1. get model
-    embedding = get_kobert_word_embedding().to(device).eval()
+    embedding = nn.Embedding( list(TEXT_field.vocab.vectors.shape)).to(device).eval()
     encoder = Encoder(embedding, args.dim_y, args.dim_z).to(device).eval()
-    generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, kobert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel).to(device).eval()
+    generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, eos_token_id, use_gumbel=args.use_gumbel).to(device).eval()
     
     # 2. load checkpoint
     ckpt = torch.load(args.ckpt_path, map_location=device)
@@ -35,18 +45,17 @@ def transfer():
         # interactive mode
         while True:
             text = input("Enter text to transfer to stye {} (Ctrl+C to exit): ".format(args.transfer_to))
-            text_tokens = [kobert_tokenizer.bos_token_id] + kobert_tokenizer.encode(text, add_special_tokens=False) + [kobert_tokenizer.eos_token_id]
-            text_tokens_tensor = torch.LongTensor([text_tokens]).transpose(0, 1).to(device)
+            text_tokens = TEXT_field.preprocess(text)
+            text_tokens_tensor = TEXT_field.process([text_tokens])[0].to(device) # process returns (token tensors=(seq_len, batch_size), len)
             src_len = [len(text_tokens)]
             original_label = torch.FloatTensor([1-args.transfer_to]).to(device)
             transfer_label = torch.FloatTensor([args.transfer_to]).to(device)
             
             z = encoder(original_label, text_tokens_tensor, src_len)
-            predictions = generator.transfer(z, transfer_label, eos_token_id=kobert_tokenizer.eos_token_id, max_len=args.transfer_max_len)
-            if predictions[-1] == kobert_tokenizer.eos_token_id:
-                predictions = predictions[:-1]
-                
-            result = kobert_tokenizer.decode(predictions)
+            predictions = generator.transfer(z, transfer_label, eos_token_id=eos_token_id, max_len=args.transfer_max_len, top_k=2)
+            predictions = torch.stack(predictions) # (seq_len, 1)
+
+            result = TEXT_field.reverse(predictions)
             print("Transfer Result:", result)
             if fw is not None:
                 fw.write(text + ' -> ' + result + '\n')
@@ -57,12 +66,12 @@ def transfer():
                     recon = recon[:-1]
                 print("Recon:", kobert_tokenizer.decode(recon))
             
-    else:
+    else: # 나중에 고치자
 
         for line in args.test_text_path:
             line = line.strip()
             text = line
-            text_tokens = [kobert_tokenizer.bos_token_id] + kobert_tokenizer.encode(text, add_special_tokens=False) + [kobert_tokenizer.eos_token_id]
+            text_tokens = [eos_token_id] + kobert_tokenizer.encode(text, add_special_tokens=False) + [kobert_tokenizer.eos_token_id]
             text_tokens_tensor = torch.LongTensor([text_tokens]).to(device)
             src_len = [len(text_tokens)]
             original_label = torch.FloatTensor([1-args.transfer_to]).to(device)
