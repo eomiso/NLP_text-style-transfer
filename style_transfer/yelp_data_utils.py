@@ -6,7 +6,6 @@ author : Uiseop Eom
 
 
 import pandas as pd
-from tqdm import tqdm
 
 import torchtext.data as data
 import torch
@@ -127,17 +126,14 @@ def equalize_seq_num(path_0, path_1):
     print(remain_num)
     
 
-    for i in tqdm(range(repeat_num)):
+    for i in range(repeat_num):
         smaller = smaller.append(smaller, ignore_index=True)
     
     len_small = len(smaller)
-    for i in tqdm(range(remain_num)):
+    for i in range(remain_num):
         smaller = smaller.append(smaller.loc[i%len_small], ignore_index=True)
 
 
-    #for i in tqdm(range(len(larger) - len(smaller))):
-    #    smaller = smaller.append(smaller.loc[i%len_small], ignore_index=True)
-    #    i+=1
     print("data length: {}".format(len(smaller)))
     assert len(larger)==len(smaller)
 
