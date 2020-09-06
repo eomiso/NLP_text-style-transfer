@@ -135,7 +135,7 @@ class Generator(nn.Module):
             input = self.embed(self.bos_token_id).repeat(src.shape[1], 1)
             input = input.unsqueeze(0)                            # [1, batch_size, embed_dim]
             hidden = h0.unsqueeze(0)                              # [1, batch_size, hidden_size]
-            for t in range(1, max(src_len)): 
+            for t in range(1, max(max(src_len),5)): # CNN필터에서 에러가 계속난다. sequence의 길이가  max(filter_sizes) 보다 적으면 에러가 난다. 
                 output, hidden = self.rnn(input, hidden)
                 outputs.append(output)
                 prediction = self.fc_out(output)    
@@ -152,7 +152,7 @@ class Generator(nn.Module):
             h0 =  torch.cat((self.fc(labels), z), -1)  #h0_original
             input = self.embed(src[0]).unsqueeze(0)    
             hidden = h0.unsqueeze(0) # [1, batch_size, hidden_size]
-            for t in range(1, max(src_len)):
+            for t in range(1, max(max(src_len),5)):
                 output, hidden = self.rnn(input, hidden)
                 outputs.append(output)
                 prediction = self.fc_out(output)
