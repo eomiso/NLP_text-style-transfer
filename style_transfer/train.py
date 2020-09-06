@@ -160,7 +160,7 @@ def train():
 
         for ix, (batch_from_0, batch_from_1) in enumerate(zip(val_iter_0, val_iter_1)):
             start_time = time.time()
-            (src_0, src_len_0, labels_0), (src_1, src_1, src_len_1, labels_1) = set_labels(batch_from_0, batch_from_1)
+            (src_0, src_len_0, labels_0), (src_1, src_len_1, labels_1) = set_labels(batch_from_0, batch_from_1)
 
             src_0, labels_0 = src_0.to(device), labels_0.to(device)
             src_1, labels_1 = src_1.to(device), labels_1.to(device)
