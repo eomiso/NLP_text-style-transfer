@@ -154,7 +154,7 @@ def train():
         loss_rec_avg_meter = AverageMeter('Loss Rec', ':.4e')
         loss_adv_avg_meter = AverageMeter('Loss Adv', ':.4e')
         loss_disc_avg_meter = AverageMeter('Loss Disc', ':.4e')
-        progress_meter = ProgressMeter(len(val_dataloader_0), 
+        progress_meter = ProgressMeter(len(val_iter_0), 
                                         [loss_rec_avg_meter, loss_adv_avg_meter, loss_disc_avg_meter],
                                         prefix="[Validation] Epoch: [{}]".format(epoch + 1))
 
