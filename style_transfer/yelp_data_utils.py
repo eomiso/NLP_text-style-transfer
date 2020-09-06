@@ -12,8 +12,17 @@ import torchtext.data as data
 import torch
 import glob
 
+def get_pad_to_min_len_fn(min_length):
+    def pad_to_min_len(batch, vocab, min_length=min_length):
+        pad_idx = vocab.stoi['<pad>']
+        for idx, ex in enumerate(batch):
+            if len(ex) < min_length:
+                batch[idx] = ex + [pad_idx] * (min_length - len(ex))
+        return batch
+    return pad_to_min_len
 
-def get_iterator_for_train_val_test(path_to_texts, batch_size):
+
+def get_iterator_for_train_val_test(path_to_texts, batch_size, filter_sizes):
     #path_to_texts should include "/" at the end
     # Equalize the number of sentences in the two files.
     # 혹시 Dataloader 만들 때 이거 같이 해주었었는지?
@@ -22,7 +31,6 @@ def get_iterator_for_train_val_test(path_to_texts, batch_size):
     equalize_seq_num(*[f for f in glob.glob(path_to_texts+"*dev*")])
     equalize_seq_num(*[f for f in glob.glob(path_to_texts+"*test*")])
 
-
     # Initiate Text Field 
     TEXT = ReversibleField(
         tokenize="spacy",
@@ -30,7 +38,8 @@ def get_iterator_for_train_val_test(path_to_texts, batch_size):
         init_token = '<sos>',
         eos_token = '<eos>',
         include_lengths=True,
-        lower = True
+        lower = True,
+        postprocessing = get_pad_to_min_len_fn(min_length=max(filter_sizes))
     )
 
     # Init TabularDataset
@@ -55,42 +64,42 @@ def get_iterator_for_train_val_test(path_to_texts, batch_size):
     #    TEXT.build_vocab(dataset0, dataset1, min_freq=3, vectors=embedding)
     #else:
     
-    # 1.9M vocab 1.25 GB 가즈아
+    # 1.9M vocab 1.25 GB 가즈아 # min_freq를 바꾸는 것은 어떠한가?
     TEXT.build_vocab(train_0, train_1, min_freq=5, vectors="glove.42B.300d")
     # for <unk> tokens
     TEXT.vocab.unk_init = torch.randn
     
     ## make iterator
-    train_iter_0, val_iter_0, test_iter_0=BucketIterator_complete_last(
+    train_iter_0, val_iter_0, test_iter_0=BucketIterator_complete_last.splits(
         (train_0, val_0, test_0), 
-        batch_size=(batch_size, 256, 256)
+        batch_sizes=(batch_size, 256, 256),
         sort_within_batch=True,
         sort_key=lambda x : len(x.src),
     )
 
-    train_iter_1, val_iter_1, test_iter_1=BucketIterator_complete_last(
+    train_iter_1, val_iter_1, test_iter_1=BucketIterator_complete_last.splits(
         (train_1, val_1, test_1), 
-        batch_size=b(batch_size, 256, 256)
+        batch_sizes=(batch_size, 256, 256),
         sort_within_batch=True,
-        sort_key=lambda x : len(x.src)
+        sort_key=lambda x : len(x.src),
     )
     
     print("Vocab Size: {} tokens.".format(len(TEXT.vocab)))
-    save_vocab(TEXT_field.vocab)
+    save_field(TEXT)
 
     return (train_iter_0, val_iter_0, test_iter_0), (train_iter_1, val_iter_1, test_iter_1), TEXT
 
-import pickle
-def save_vocab(vocab):
+import dill as pickle
+def save_field(field):
     """
     for loading embeddings in transfer.py,
     you need to form a dummy nn.Embedding first
     """
-    with open("YELP.vocab", 'wb') as f:
-        pickle.dump(vocab, f)
+    with open("YELP.field", 'wb') as f:
+        pickle.dump(field, f)
 
-def load_vocab():
-    with open("YELP.vocab", 'rb') as f:
+def load_field():
+    with open("YELP.field", 'rb') as f:
         vocab = pickle.load(f)
     return vocab
 
@@ -194,7 +203,6 @@ class ReversibleField(data.Field):
         def filter_special(tok):
             return tok not in (self.init_token, self.pad_token)
         batch = [list(filter(filter_special, ex)) for ex in batch]
-        print(batch)
 
         return [' '.join(ex) for ex in batch]
 

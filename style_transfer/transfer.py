@@ -14,7 +14,7 @@ from yelp_data_utils import *
 """
 변경사항
 1. TEXT_field 읽어오는 코드 추가. encode, decode를 위해서 필요
-2. 
+2. TEXT_field.reverse() 를 kobert_tokenizer 의 decode() 대신 사용
 """
 
 def transfer():
