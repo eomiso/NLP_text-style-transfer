@@ -4,7 +4,7 @@ from torch.distributions import Categorical
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from dataloader import kobert_tokenizer
+#from dataloader import kobert_tokenizer
 
 
 class Encoder(nn.Module):
