@@ -54,7 +54,7 @@ def transfer():
             
             z = encoder(original_label, text_tokens_tensor, src_len)
             predictions = generator.transfer(z, transfer_label, eos_token_id=eos_token_id, max_len=args.transfer_max_len, top_k=2)
-            predictions = torch.torch(predictions).unsqueeze(-1) # (seq_len, 1)
+            predictions = torch.tensor(predictions).unsqueeze(-1) # (seq_len, 1)
 
             result = TEXT_field.reverse(predictions)
             print("Transfer Result:", result)
