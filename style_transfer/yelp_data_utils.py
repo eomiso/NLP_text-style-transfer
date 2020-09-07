@@ -11,6 +11,8 @@ import torchtext.data as data
 import torch
 import glob
 
+from options import args
+
 def get_pad_to_min_len_fn(min_length):
     def pad_to_min_len(batch, vocab, min_length=min_length):
         pad_idx = vocab.stoi['<pad>']
@@ -21,7 +23,7 @@ def get_pad_to_min_len_fn(min_length):
     return pad_to_min_len
 
 
-def get_iterator_for_train_val_test(path_to_texts, batch_size, filter_sizes):
+def get_iterator_for_train_val_test(path_to_texts):
     #path_to_texts should include "/" at the end
     # Equalize the number of sentences in the two files.
     # 혹시 Dataloader 만들 때 이거 같이 해주었었는지?
@@ -38,7 +40,7 @@ def get_iterator_for_train_val_test(path_to_texts, batch_size, filter_sizes):
         eos_token = '<eos>',
         include_lengths=True,
         lower = True,
-        postprocessing = get_pad_to_min_len_fn(min_length=max(filter_sizes))
+        postprocessing = get_pad_to_min_len_fn(min_length=max(args.filter_sizes))
     )
 
     # Init TabularDataset
@@ -71,14 +73,14 @@ def get_iterator_for_train_val_test(path_to_texts, batch_size, filter_sizes):
     ## make iterator
     train_iter_0, val_iter_0, test_iter_0=BucketIterator_complete_last.splits(
         (train_0, val_0, test_0), 
-        batch_sizes=(batch_size, 256, 256),
+        batch_sizes=(args.batch_size, 256, 256),
         sort_within_batch=True,
         sort_key=lambda x : len(x.src),
     )
 
     train_iter_1, val_iter_1, test_iter_1=BucketIterator_complete_last.splits(
         (train_1, val_1, test_1), 
-        batch_sizes=(batch_size, 256, 256),
+        batch_sizes=(args.batch_size, 256, 256),
         sort_within_batch=True,
         sort_key=lambda x : len(x.src),
     )
@@ -94,11 +96,11 @@ def save_field(field):
     for loading embeddings in transfer.py,
     you need to form a dummy nn.Embedding first
     """
-    with open("YELP.field", 'wb') as f:
+    with open(args.field_path, 'wb') as f:
         pickle.dump(field, f)
 
 def load_field():
-    with open("YELP.field", 'rb') as f:
+    with open(args.field_path, 'rb') as f:
         vocab = pickle.load(f)
     return vocab
 
@@ -199,8 +201,10 @@ class ReversibleField(data.Field):
         def filter_special(tok):
             return tok not in (self.init_token, self.pad_token)
         batch = [list(filter(filter_special, ex)) for ex in batch]
-
+        #if tokenizer ==  "spacy":
         return [' '.join(ex) for ex in batch]
+        #else:
+        #    return [''.join(ex).replace('_',' ') for ex in batch]
 
 
 def preprocessing(text):

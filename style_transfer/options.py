@@ -91,6 +91,13 @@ argparser.add_argument("--transfer_result_save_path",
 argparser.add_argument('--test_recon',
                        default=False,
                        type=str2bool)
+# To be erased later
+argparser.add_argument('--field_path',
+                       default=False,
+                       type=str)
+argparser.add_argument('--tokenizer',
+                       default='AutoTokenizer',
+                       choices=['AutoTokenizer, Spacy'])
 
 # others
 argparser.add_argument("--cuda_device",

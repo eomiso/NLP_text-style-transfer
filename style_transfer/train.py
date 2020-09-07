@@ -34,7 +34,7 @@ def train():
     # 1. get data
     # using torchtext
     (train_iter_0, val_iter_0, test_iter_0), (train_iter_1, val_iter_1, test_iter_1), \
-        TEXT_field = get_iterator_for_train_val_test(args.text_file_path, args.batch_size, args.filter_sizes)
+        TEXT_field = get_iterator_for_train_val_test(args.text_file_path)
     pad_token_id = TEXT_field.vocab.stoi['<pad>']
     eos_token_id = TEXT_field.vocab.stoi['<eos>']
     
