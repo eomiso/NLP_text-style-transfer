@@ -1,11 +1,13 @@
 import torch
 from torch.utils.data import Dataset, DataLoader, Subset
-from tokenization_kobert import KoBertTokenizer
+from tokenization_kobert import KoBertTokenizer, AutoTokenizer
 import json
 import numpy as np
 import time
 
-kobert_tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
+from options import args
+
+kobert_tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert') if args.language == 'ko' else AutoTokenizer.from_pretrained('bert-base-cased')
 special_tokens_to_add = {
     'bos_token': '[BOS]',
     'eos_token': '[EOS]',
