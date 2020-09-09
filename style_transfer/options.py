@@ -97,7 +97,7 @@ argparser.add_argument('--field_path',
                        type=str)
 argparser.add_argument('--tokenizer',
                        default='AutoTokenizer',
-                       choices=['AutoTokenizer, Spacy'])
+                       choices=['AutoTokenizer', 'Spacy'])
 
 # others
 argparser.add_argument("--cuda_device",
