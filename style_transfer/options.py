@@ -72,6 +72,9 @@ argparser.add_argument('--gan_type',
 argparser.add_argument('--log_interval',
                        default=100,
                        type=int)
+argparser.add_argument('--language',
+                       default='ko',
+                       choices=['ko', 'en'])
 
 # testing
 argparser.add_argument('--test_text_path',
