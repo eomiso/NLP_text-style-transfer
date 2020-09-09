@@ -135,7 +135,7 @@ def validate(embedding, encoder, generator, discriminator_0, discriminator_1):
     
     switch_mode([embedding, encoder, generator, discriminator_0, discriminator_1], train=False)
     # get data
-    train_dataloader_0, train_dataloader_1  = get_dataloader_for_train(args.val_text_file_path, bert_tokenizer, args.max_seq_length,
+    val_dataloader_0, val_dataloader_1  = get_dataloader_for_train(args.val_text_file_path, bert_tokenizer, args.max_seq_length,
                                                                         batch_size=args.batch_size, num_workers=args.num_workers)
     
     for ix, ((src_0, src_len_0, labels_0), (src_1, src_len_1, labels_1)) in enumerate(zip(val_dataloader_0, val_dataloader_1)):
