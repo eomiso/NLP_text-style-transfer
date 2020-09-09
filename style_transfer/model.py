@@ -211,7 +211,7 @@ class TextCNN(nn.Module):
 
 def get_kobert_word_embedding():
     from transformers import BertModel
-    BERT = BertModel.from_pretrained('monologg/kobert') if args.language == 'ko' else BertModel.from_pretrained('bert-base-uncased')
+    BERT = BertModel.from_pretrained('monologg/kobert') if args.language == 'ko' else BertModel.from_pretrained('bert-base-cased')
     
     num_embeddings = kobert_tokenizer.vocab_size + len(kobert_tokenizer.get_added_vocab())
     embed_dim = BERT.embeddings.word_embeddings.embedding_dim
