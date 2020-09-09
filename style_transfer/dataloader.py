@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader, Subset
-from tokenization_kobert import KoBertTokenizer, AutoTokenizer
+from tokenization_kobert import KoBertTokenizer
+from transformers import AutoTokenizer
 import json
 import numpy as np
 import time
@@ -24,7 +25,7 @@ class NSMCStyleTransfer(Dataset):
         self.texts = []
         self.labels = []
         with open(txt_path) as fr:
-            fr.readline()
+            fr.readline() # header line
             for line in fr:
                 line = line.strip().split('\t')  # expects tsv format
                 if int(line[2]) == label:
