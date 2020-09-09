@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 
 from dataloader import kobert_tokenizer
+from options import args
 
 
 class Encoder(nn.Module):
@@ -210,7 +211,7 @@ class TextCNN(nn.Module):
 
 def get_kobert_word_embedding():
     from transformers import BertModel
-    BERT = BertModel.from_pretrained('monologg/kobert')
+    BERT = BertModel.from_pretrained('monologg/kobert') if args.language == 'ko' else BertModel.from_pretrained('bert-base-uncased')
     
     num_embeddings = kobert_tokenizer.vocab_size + len(kobert_tokenizer.get_added_vocab())
     embed_dim = BERT.embeddings.word_embeddings.embedding_dim
