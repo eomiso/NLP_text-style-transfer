@@ -16,6 +16,8 @@ argparser.add_argument('--ckpt_path',
 # dataloading
 argparser.add_argument('--text_file_path',
                        type=str)
+argparser.add_argument('--val_text_file_path',
+                       type=str)
 argparser.add_argument('--batch_size',
                        type=int,
                        default=64)
