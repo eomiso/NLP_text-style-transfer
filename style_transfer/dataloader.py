@@ -8,12 +8,12 @@ import time
 
 from options import args
 
-kobert_tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert') if args.language == 'ko' else AutoTokenizer.from_pretrained('bert-base-cased')
+bert_tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert') if args.language == 'ko' else AutoTokenizer.from_pretrained('bert-base-cased')
 special_tokens_to_add = {
     'bos_token': '[BOS]',
     'eos_token': '[EOS]',
 }
-kobert_tokenizer.add_special_tokens(special_tokens_to_add)
+bert_tokenizer.add_special_tokens(special_tokens_to_add)
 
 
 class NSMCStyleTransfer(Dataset):

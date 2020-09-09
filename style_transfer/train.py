@@ -5,8 +5,8 @@ from torch.nn import functional as F
 import time
 import numpy as np
 
-from dataloader import kobert_tokenizer, get_dataloader_for_train
-from model import Encoder, Generator, Discriminator, get_kobert_word_embedding
+from dataloader import bert_tokenizer, get_dataloader_for_train
+from model import Encoder, Generator, Discriminator, get_bert_word_embedding
 
 from options import args
 from utils import AverageMeter, ProgressMeter
@@ -17,14 +17,14 @@ def train():
     device = torch.device('cuda:{}'.format(args.cuda_device) if torch.cuda.is_available() else 'cpu')
     
     # 1. get model
-    embedding = get_kobert_word_embedding().to(device)
+    embedding = get_bert_word_embedding().to(device)
     encoder = Encoder(embedding, args.dim_y, args.dim_z).to(device)
-    generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, kobert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel).to(device)
+    generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, bert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel).to(device)
     discriminator_0 = Discriminator(args.dim_y + args.dim_z, args.n_filters, args.filter_sizes).to(device)  # 0: real, 1: fake
     discriminator_1 = Discriminator(args.dim_y + args.dim_z, args.n_filters, args.filter_sizes).to(device)  # 1: real, 0: fake
     
     # 2. get data
-    train_dataloader_0, train_dataloader_1  = get_dataloader_for_train(args.text_file_path, kobert_tokenizer, args.max_seq_length,
+    train_dataloader_0, train_dataloader_1  = get_dataloader_for_train(args.text_file_path, bert_tokenizer, args.max_seq_length,
                                                                        batch_size=args.batch_size, num_workers=args.num_workers)
     
     # 3. get optimizer
@@ -38,6 +38,8 @@ def train():
     # finally, train!
     for epoch in range(args.epochs):
         
+        train(eval=False)
+
         switch_mode([embedding, encoder, generator, discriminator_0, discriminator_1], train=True)
         
         loss_rec_avg_meter = AverageMeter('Loss Rec', ':.4e')
@@ -89,8 +91,8 @@ def train():
             loss_disc_avg_meter.update(loss_disc.item(), src_0.size(0)) # log
             
             # train embedding/encoder/generator
-            loss_rec = 0.5 * (F.cross_entropy(prediction_ori_0.view(-1, prediction_ori_0.size(-1)), src_0[1:].view(-1), ignore_index=kobert_tokenizer.pad_token_id) + \
-                              F.cross_entropy(prediction_ori_1.view(-1, prediction_ori_0.size(-1)), src_1[1:].view(-1), ignore_index=kobert_tokenizer.pad_token_id))
+            loss_rec = 0.5 * (F.cross_entropy(prediction_ori_0.view(-1, prediction_ori_0.size(-1)), src_0[1:].view(-1), ignore_index=bert_tokenizer.pad_token_id) + \
+                              F.cross_entropy(prediction_ori_1.view(-1, prediction_ori_0.size(-1)), src_1[1:].view(-1), ignore_index=bert_tokenizer.pad_token_id))
 
             d_0_fake = discriminator_0(h_trans_seq_1_to_0)
             d_1_fake = discriminator_1(h_trans_seq_0_to_1)
@@ -125,7 +127,9 @@ def train():
         progress_meter.display(len(train_dataloader_0))
                 
         save_checkpoint(embedding, encoder, generator, discriminator_0, discriminator_1, path=args.ckpt_path)
-                
+
+def validate():
+    
 
 def switch_mode(modules, train=True):
     for module in modules:

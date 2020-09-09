@@ -4,7 +4,7 @@ from torch.distributions import Categorical
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from dataloader import kobert_tokenizer
+from dataloader import bert_tokenizer
 from options import args
 
 
@@ -209,16 +209,16 @@ class TextCNN(nn.Module):
         return self.fc(cat)
     
 
-def get_kobert_word_embedding():
+def get_bert_word_embedding():
     from transformers import BertModel
     BERT = BertModel.from_pretrained('monologg/kobert') if args.language == 'ko' else BertModel.from_pretrained('bert-base-cased')
     
-    num_embeddings = kobert_tokenizer.vocab_size + len(kobert_tokenizer.get_added_vocab())
+    num_embeddings = bert_tokenizer.vocab_size + len(bert_tokenizer.get_added_vocab())
     embed_dim = BERT.embeddings.word_embeddings.embedding_dim
     
     # need to add embedding for bos and eos token
-    embedding = nn.Embedding(num_embeddings, embed_dim, padding_idx=kobert_tokenizer.pad_token_id)
-    embedding.weight.data[:kobert_tokenizer.vocab_size] = BERT.embeddings.word_embeddings.weight.data
+    embedding = nn.Embedding(num_embeddings, embed_dim, padding_idx=bert_tokenizer.pad_token_id)
+    embedding.weight.data[:bert_tokenizer.vocab_size] = BERT.embeddings.word_embeddings.weight.data
     return embedding
 
 
