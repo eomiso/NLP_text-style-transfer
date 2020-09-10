@@ -208,7 +208,7 @@ def validate(embedding, encoder, generator, discriminator_0, discriminator_1, de
         
         time_avg_meter.update(time.time() - start_time)
 
-    progress_meter.display(len(val_iter_0))
+    progress_meter.display(len(val_dataloader_0))
 
     val_loss = loss_rec_avg_meter.avg + loss_adv_avg_meter.avg
     return val_loss
