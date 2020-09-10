@@ -135,16 +135,16 @@ def validate(embedding, encoder, generator, discriminator_0, discriminator_1, de
     
     switch_mode([embedding, encoder, generator, discriminator_0, discriminator_1], train=False)
 
+     # get data
+    val_dataloader_0, val_dataloader_1  = get_dataloader_for_train(args.val_text_file_path, bert_tokenizer, args.max_seq_length,
+                                                                        batch_size=args.batch_size, num_workers=args.num_workers)
+
     loss_rec_avg_meter = AverageMeter('Loss Rec', ':.4e')
     loss_adv_avg_meter = AverageMeter('Loss Adv', ':.4e')
     loss_disc_avg_meter = AverageMeter('Loss Disc', ':.4e')
-    progress_meter = ProgressMeter(len(val_iter_0), 
+    progress_meter = ProgressMeter(len(val_dataloader_0), 
                                     [loss_rec_avg_meter, loss_adv_avg_meter, loss_disc_avg_meter],
                                     prefix="[Validation] Epoch: [{}]".format(epoch + 1))
-
-    # get data
-    val_dataloader_0, val_dataloader_1  = get_dataloader_for_train(args.val_text_file_path, bert_tokenizer, args.max_seq_length,
-                                                                        batch_size=args.batch_size, num_workers=args.num_workers)
 
     for ix, ((src_0, src_len_0, labels_0), (src_1, src_len_1, labels_1)) in enumerate(zip(val_dataloader_0, val_dataloader_1)):
         start_time = time.time()
