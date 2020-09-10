@@ -125,13 +125,13 @@ def train():
         progress_meter.display(len(train_dataloader_0))
         
         #end of epoch, validate!
-        val_loss = validate(embedding, encoder, generator, discriminator_0, discriminator_1)
+        val_loss = validate(embedding, encoder, generator, discriminator_0, discriminator_1, device)
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             print("Best Val Loss, saving checkpoint")
             save_checkpoint(embedding, encoder, generator, discriminator_0, discriminator_1, path=args.ckpt_path)
 
-def validate(embedding, encoder, generator, discriminator_0, discriminator_1):
+def validate(embedding, encoder, generator, discriminator_0, discriminator_1, device):
     
     switch_mode([embedding, encoder, generator, discriminator_0, discriminator_1], train=False)
     # get data
