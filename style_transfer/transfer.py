@@ -7,7 +7,7 @@ import time
 import numpy as np
 
 from dataloader import bert_tokenizer
-from model import Encoder, Generator, Discriminator, get_kobert_word_embedding
+from model import Encoder, Generator, Discriminator, get_bert_word_embedding
 from options import args
 
 
@@ -15,7 +15,7 @@ def transfer():
     device = torch.device('cuda:{}'.format(args.cuda_device) if torch.cuda.is_available() else 'cpu')
     
     # 1. get model
-    embedding = get_kobert_word_embedding().to(device).eval()
+    embedding = get_bert_word_embedding().to(device).eval()
     encoder = Encoder(embedding, args.dim_y, args.dim_z).to(device).eval()
     generator = Generator(embedding, args.dim_y, args.dim_z, args.temperature, bert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel).to(device).eval()
     
