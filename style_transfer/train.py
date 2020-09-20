@@ -110,7 +110,11 @@ def train():
             else:
                 raise NotImplementedError
             
-            loss = loss_rec + args.rho * loss_adv
+            #Threshold
+            if loss_disc < args.threshold:
+                loss = loss_rec + args.rho * loss_adv
+            else:
+                loss = loss_rec
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

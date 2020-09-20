@@ -77,6 +77,9 @@ argparser.add_argument('--log_interval',
 argparser.add_argument('--language',
                        default='ko',
                        choices=['ko', 'en'])
+argparser.add_argument('--threshold',
+                       type=float,
+                       default=3e-01)
 
 # testing
 argparser.add_argument('--test_text_path',

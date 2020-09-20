@@ -63,7 +63,7 @@ def transfer():
             line = line.strip()
             text = line
             text_tokens = [bert_tokenizer.bos_token_id] + bert_tokenizer.encode(text, add_special_tokens=False) + [bert_tokenizer.eos_token_id]
-            text_tokens_tensor = torch.LongTensor([text_tokens]).to(device)
+            text_tokens_tensor = torch.LongTensor([text_tokens]).transpose(0, 1).to(device)
             src_len = [len(text_tokens)]
             original_label = torch.FloatTensor([1-args.transfer_to]).to(device)
             transfer_label = torch.FloatTensor([args.transfer_to]).to(device)
