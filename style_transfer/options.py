@@ -1,7 +1,7 @@
 import sys
 import argparse
 import pprint
-import os.path
+import torch
 from utils import str2bool
 
 
@@ -14,6 +14,10 @@ argparser.add_argument('--ckpt_path',
                        type=str)
 
 # dataloading
+argparser.add_argument('--dataset',
+                       type=str,
+                       choices=['yelp', 'nsmc'],
+                       default=None)
 argparser.add_argument('--text_file_path',
                        type=str)
 argparser.add_argument('--val_text_file_path',
@@ -41,7 +45,7 @@ argparser.add_argument('--dim_emb',
 argparser.add_argument('--filter_sizes',
                        type=int,
                        nargs='+',
-                       default=[1,2,3,4,5])
+                       default=[1, 2, 3, 4, 5])
 argparser.add_argument('--n_filters',
                        type=int,
                        default=128)
@@ -65,7 +69,7 @@ argparser.add_argument("--temperature",
 argparser.add_argument('--use_gumbel',
                        default=True,
                        type=str2bool)
-argparser.add_argument('--rho',                 # loss_rec + rho * loss_adv
+argparser.add_argument('--rho',  # loss_rec + rho * loss_adv
                        type=float,
                        default=1)
 argparser.add_argument('--gan_type',
@@ -104,11 +108,27 @@ argparser.add_argument("--cuda_device",
                        type=int,
                        default=0)
 
-
 args = argparser.parse_args()
+
+args.device = torch.device(
+    'cuda:{}'.format(args.cuda_device) if torch.cuda.is_available() else 'cpu'
+)
+
+# dataset path presets
+if args.dataset == 'yelp':
+    args.text_file_path = '../data/yelp/yelp.sentiment.train'
+    args.val_text_file_path = '../data/yelp/yelp.sentiment.val'
+    args.test_text_path = '../data/yelp/yelp.sentiment.test'
+elif args.dataset == 'nsmc':
+    args.text_file_path = '../data/nsmc/ratings_train.txt'
+    args.val_text_file_path = '../data/nsmc/ratings_test.txt'
+    args.test_text_path = '../data/nsmc/ratings_test.test'
+elif args.dataset is None:
+    assert args.text_file_path is not None
+    assert args.val_text_file_path is not None
+    assert args.test_text_path is not None
 
 print('------------------------------------------------')
 pp = pprint.PrettyPrinter(indent=4)
 pp.pprint(vars(args))
 print('------------------------------------------------')
-
