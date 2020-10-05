@@ -35,11 +35,13 @@ def gradient_penalty(real_data, gen_data, disc):
 
 
 def wgan_disc(data, labels):
-    return (-data * labels + data * (1 - labels)).mean()
+    probs = torch.sigmoid(data)
+    return (-probs * labels + probs * (1 - labels)).mean()
 
 
 def wgan_gen(data, labels):
-    return (-data * labels).mean()
+    probs = torch.sigmoid(data)
+    return (-probs * labels).mean()
 
 
 def loss_fn(gan_type='vanilla', disc=True):
