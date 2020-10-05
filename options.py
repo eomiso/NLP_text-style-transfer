@@ -75,6 +75,9 @@ argparser.add_argument('--rho',  # loss_rec + rho * loss_adv
 argparser.add_argument('--gan_type',
                        default='vanilla',
                        choices=['vanilla', 'wgan-gp', 'lsgan'])
+argparser.add_argument('--gp_weight',
+                       default=1.0,
+                       type=float)
 argparser.add_argument('--log_interval',
                        default=100,
                        type=int)
@@ -83,7 +86,7 @@ argparser.add_argument('--language',
                        choices=['ko', 'en'])
 argparser.add_argument('--threshold',
                        type=float,
-                       default=3e-01)
+                       default=None)
 
 # testing
 argparser.add_argument('--test_text_path',
@@ -114,15 +117,17 @@ args.device = torch.device(
     'cuda:{}'.format(args.cuda_device) if torch.cuda.is_available() else 'cpu'
 )
 
-# dataset path presets
+# dataset presets
 if args.dataset == 'yelp':
-    args.text_file_path = '../data/yelp/yelp.sentiment.train'
-    args.val_text_file_path = '../data/yelp/yelp.sentiment.val'
-    args.test_text_path = '../data/yelp/yelp.sentiment.test'
+    args.language = 'en'
+    args.text_file_path = 'data/yelp/yelp.sentiment.train'
+    args.val_text_file_path = 'data/yelp/yelp.sentiment.val'
+    args.test_text_path = 'data/yelp/yelp.sentiment.test'
 elif args.dataset == 'nsmc':
-    args.text_file_path = '../data/nsmc/ratings_train.txt'
-    args.val_text_file_path = '../data/nsmc/ratings_test.txt'
-    args.test_text_path = '../data/nsmc/ratings_test.test'
+    args.language = 'ko'
+    args.text_file_path = 'data/nsmc/ratings_train.txt'
+    args.val_text_file_path = 'data/nsmc/ratings_test.txt'
+    args.test_text_path = 'data/nsmc/ratings_test.test'
 elif args.dataset is None:
     assert args.text_file_path is not None
     assert args.val_text_file_path is not None

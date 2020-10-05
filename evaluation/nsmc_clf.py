@@ -21,18 +21,18 @@ BERT_MODEL_FEATURE_SIZE = {
 class BertClassifier(nn.Module):
     def __init__(self, num_class, model_type='monologg/kobert', dropout_rate=0.1):
         super(). __init__()
-        
+
         assert model_type in BERT_MODEL_FEATURE_SIZE
-        
+
         self.model_type = model_type
         self.BERT = BertModel.from_pretrained(model_type)
         self.BERT.train()
-        
+
         self.dropout = nn.Dropout(dropout_rate)
         self.fc = nn.Linear(BERT_MODEL_FEATURE_SIZE[model_type], num_class)
-        
+
         self.tokenizer = KoBertTokenizer.from_pretrained(model_type)
-        
+
     def get_tokenizer(self):
         return self.tokenizer
 
@@ -42,14 +42,14 @@ class BertClassifier(nn.Module):
         attention_mask: torch.LongTensor with shape (batch_size, seq_len), element being either 0 or 1, 0 for padded position
         """
         batch_size = input_ids.size(0)
-        
+
         bert_out = self.BERT(input_ids=input_ids, attention_mask=attention_mask)
         features = bert_out[0]  
-        
+
         features = features[:, 0]  # (batch_size, feature_size), output at [CLS]
-        
+
         logits = self.fc(self.dropout(features))
-        
+
         return logits
 
 
@@ -67,20 +67,20 @@ class NSMC(Dataset):
                 line = line.strip().split('\t')  # expects tsv format
                 self.texts.append(line[1])
                 self.labels.append(int(line[2]))
-                    
+
     def __len__(self):
         return len(self.texts)
-    
+
     def __getitem__(self, idx):
         text = self.texts[idx]
         labels = self.labels[idx]
-        
-        input_ids = self.tokenizer.encode(text, add_special_tokens=True) # add [CLS] at the beginning and [SEP] at the end
+
+        input_ids = self.tokenizer.encode(text, add_special_tokens=True)  # add [CLS] at the beginning and [SEP] at the end
         input_ids = input_ids[:min(len(input_ids), self.maxlen)-1] + input_ids[-1:]  # must always include [SEP] at the end
-        
+
         return torch.LongTensor(input_ids), labels
-        
-        
+
+
 def collate_fn(data):
     input_ids, class_labels = zip(*data)
     

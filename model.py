@@ -3,9 +3,6 @@ import torch.nn as nn
 from torch.distributions import Categorical
 import torch.nn.functional as F
 
-from dataloader import bert_tokenizer
-from options import args
-
 
 class Encoder(nn.Module):
     def __init__(self, embedding, dim_y, dim_z):
@@ -228,28 +225,3 @@ class TextCNN(nn.Module):
         cat = self.dropout(torch.cat(pooled, dim=1))
         # cat = [batch size, n_filters * len(filter_sizes)]
         return self.fc(cat)
-
-
-def get_bert_word_embedding():
-    from transformers import BertModel
-
-    if args.language == 'ko':
-        model_name = 'monologg/kobert'
-    else:
-        model_name = 'bert-base-cased'
-    BERT = BertModel.from_pretrained(model_name)
-
-    num_embeddings = (bert_tokenizer.vocab_size
-                      + len(bert_tokenizer.get_added_vocab()))
-    embed_dim = BERT.embeddings.word_embeddings.embedding_dim
-
-    # need to add embedding for bos and eos token
-    embedding = nn.Embedding(
-        num_embeddings,
-        embed_dim,
-        padding_idx=bert_tokenizer.pad_token_id
-    )
-    embedding.weight.data[:bert_tokenizer.vocab_size].copy_(
-        BERT.embeddings.word_embeddings.weight.data
-    )
-    return embedding

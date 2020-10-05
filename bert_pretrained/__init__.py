@@ -1,0 +1,2 @@
+from bert_pretrained.tokenizer import bert_tokenizer
+from bert_pretrained.model import get_bert_word_embedding

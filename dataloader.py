@@ -1,23 +1,9 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-from tokenization_kobert import KoBertTokenizer
-from transformers import AutoTokenizer
 import numpy as np
 
-from options import args
 
-if args.language == 'ko':
-    bert_tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
-else:
-    bert_tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
-special_tokens_to_add = {
-    'bos_token': '[BOS]',
-    'eos_token': '[EOS]',
-}
-bert_tokenizer.add_special_tokens(special_tokens_to_add)
-
-
-class NSMCStyleTransfer(Dataset):
+class StyleTransfer(Dataset):
     def __init__(self, txt_path, tokenizer, maxlen=256, label=1):
         assert tokenizer.bos_token_id is not None and tokenizer.eos_token_id is not None
         self.tokenizer = tokenizer
@@ -87,8 +73,8 @@ def get_dataloader_for_train(txt_path, tokenizer, maxlen=256,
                              batch_size=16, shuffle=True, num_workers=2,
                              drop_last=True):
 
-    ds0 = NSMCStyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=0)
-    ds1 = NSMCStyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=1)
+    ds0 = StyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=0)
+    ds1 = StyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=1)
 
     train_dataloader0 = DataLoader(
         ds0,
@@ -112,8 +98,8 @@ def get_dataloader_for_train(txt_path, tokenizer, maxlen=256,
 
 def get_dataloader_for_test(txt_path, tokenizer, maxlen=256, batch_size=16,
                             num_workers=2):
-    ds0 = NSMCStyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=0)
-    ds1 = NSMCStyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=1)
+    ds0 = StyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=0)
+    ds1 = StyleTransfer(txt_path, tokenizer, maxlen=maxlen, label=1)
 
     dataloader0 = DataLoader(
         ds0,

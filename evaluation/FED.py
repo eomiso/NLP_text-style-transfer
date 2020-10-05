@@ -18,26 +18,26 @@ import tensorflow_text
 def get_kobert():
     model = BertModel.from_pretrained("monologg/kobert")
     tokenizer = KoBertTokenizer.from_pretrained("monologg/kobert")
-    
+
     pipe = pipeline('feature-extraction', model=model, tokenizer=tokenizer)
-    
+
     def embed(text):
         assert isinstance(text, str)
         return np.mean(pipe(text)[0], axis=0) # sentence embedding = mean of word embedding
-        
+
     return embed
 
 
 def get_use():
     use = hub.load("https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3")
-    
+
     def embed(text):
         assert isinstance(text, str)
         return use(text)[0].numpy()
-    
+
     return embed
 
-    
+
 def calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-6):
     """Numpy implementation of the Frechet Distance.
     The Frechet distance between two multivariate Gaussians X_1 ~ N(mu_1, C_1)
@@ -90,7 +90,7 @@ def calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-6):
 
     return (diff.dot(diff) + np.trace(sigma1) +
             np.trace(sigma2) - 2 * tr_covmean)
-    
+
 
 def main(args):
     if args.encoder == 'kobert':

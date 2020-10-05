@@ -19,8 +19,7 @@ import logging
 import os
 import unicodedata
 from shutil import copyfile
-
-from transformers import PreTrainedTokenizer
+from transformers import PreTrainedTokenizer, AutoTokenizer
 
 
 logger = logging.getLogger(__name__)
@@ -271,3 +270,15 @@ class KoBertTokenizer(PreTrainedTokenizer):
         return out_vocab_model, out_vocab_txt
 
 
+# override alias for each language
+def bert_tokenizer(language):
+    if language == 'ko':
+        tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
+    else:
+        tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
+    special_tokens_to_add = {
+        'bos_token': '[BOS]',
+        'eos_token': '[EOS]',
+    }
+    tokenizer.add_special_tokens(special_tokens_to_add)
+    return tokenizer
