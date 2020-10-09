@@ -7,11 +7,15 @@ from utils import str2bool
 
 argparser = argparse.ArgumentParser(sys.argv[0])
 
-
 argparser.add_argument('--ckpt_path',
                        required=True,
                        help="path to save/load checkpoint",
-                       type=str)
+                       type=str,
+                       default=None)
+argparser.add_argument('--clf_ckpt_path',
+                       help="path to load pretrained classifier",
+                       type=str,
+                       default=None)
 
 # dataloading
 argparser.add_argument('--dataset',

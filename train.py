@@ -5,7 +5,7 @@ from torch.nn import functional as F
 import time
 import itertools
 
-from dataloader import get_dataloader_for_train
+from dataloader import get_dataloader_for_style_transfer
 from model import Encoder, Generator, Discriminator
 from bert_pretrained import bert_tokenizer, get_bert_word_embedding
 from loss import loss_fn, gradient_penalty
@@ -18,13 +18,12 @@ class Trainer:
     def __init__(self):
         # get models
         embedding = get_bert_word_embedding()
-        self.tokenizer = tokenizer = bert_tokenizer(args.language)
         self.models = nn.ModuleDict({
             'embedding': embedding,
             'encoder': Encoder(embedding, args.dim_y, args.dim_z),
             'generator': Generator(
                 embedding, args.dim_y, args.dim_z, args.temperature,
-                tokenizer.bos_token_id, use_gumbel=args.use_gumbel
+                bert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel
             ),
             'disc_0': Discriminator(  # 0: real, 1: fake
                 args.dim_y + args.dim_z, args.n_filters, args.filter_sizes
@@ -36,13 +35,11 @@ class Trainer:
         self.models.to(args.device)
 
         # get dataloaders
-        self.train_loaders = get_dataloader_for_train(
-            args.text_file_path, tokenizer, args.max_seq_length,
-            batch_size=args.batch_size, num_workers=args.num_workers
+        self.train_loaders = get_dataloader_for_style_transfer(
+            args.text_file_path, shuffle=True, drop_last=True
         )
-        self.val_loaders = get_dataloader_for_train(
-            args.val_text_file_path, tokenizer, args.max_seq_length,
-            batch_size=args.batch_size, num_workers=args.num_workers
+        self.val_loaders = get_dataloader_for_style_transfer(
+            args.val_text_file_path, shuffle=False, drop_last=False
         )
         # label placeholders
         self.zeros = torch.zeros(args.batch_size, 1).to(args.device)
@@ -149,13 +146,13 @@ class Trainer:
                 F.cross_entropy(    # Recon 0 -> 0
                     pred_ori_0.view(-1, pred_ori_0.size(-1)),
                     src_0[1:].view(-1),
-                    ignore_index=self.tokenizer.pad_token_id,
+                    ignore_index=bert_tokenizer.pad_token_id,
                     reduction='sum'
                 )
                 + F.cross_entropy(  # Recon 1 -> 1
                     pred_ori_1.view(-1, pred_ori_1.size(-1)),
                     src_1[1:].view(-1),
-                    ignore_index=self.tokenizer.pad_token_id,
+                    ignore_index=bert_tokenizer.pad_token_id,
                     reduction='sum'
                 )
             ) / (2.0 * args.batch_size)  # match scale with the orginal paper

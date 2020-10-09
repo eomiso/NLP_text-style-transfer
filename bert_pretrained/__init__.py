@@ -1,2 +1,3 @@
 from bert_pretrained.tokenizer import bert_tokenizer
-from bert_pretrained.model import get_bert_word_embedding
+from bert_pretrained.model import get_bert_word_embedding, extract_features
+from bert_pretrained.classifier import BertClassifier

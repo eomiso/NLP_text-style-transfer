@@ -61,3 +61,7 @@ def calculate_frechet_distance(text1, text2, verbose=False):
     sigma2 = covariance(second, rowvar=False)
 
     return _frechet_distance(mu1, sigma1, mu2, sigma2)
+
+
+def calculate_accuracy(clf, text):
+    pass
