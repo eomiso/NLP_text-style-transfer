@@ -60,7 +60,10 @@ argparser.add_argument('--epochs',
                        default=20)
 argparser.add_argument('--weight_decay',
                        type=float,
-                       default=1e-6)
+                       default=0.0)
+argparser.add_argument('--max_grad_norm',
+                       type=float,
+                       default=1.0)
 argparser.add_argument('--lr',
                        type=float,
                        default=5e-4)

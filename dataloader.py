@@ -1,8 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-import numpy as np
 
-from bert_pretrained import bert_tokenizer
+from bert_pretrained.tokenizer import bert_tokenizer
 from options import args
 
 

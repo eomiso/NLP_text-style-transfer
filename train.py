@@ -7,11 +7,13 @@ import itertools
 
 from dataloader import get_dataloader_for_style_transfer
 from model import Encoder, Generator, Discriminator
-from bert_pretrained import bert_tokenizer, get_bert_word_embedding
+from bert_pretrained import bert_tokenizer, get_bert_word_embedding, FILE_ID
+from bert_pretrained.classifier import BertClassifier
 from loss import loss_fn, gradient_penalty
+from evaluate import calculate_accuracy, calculate_frechet_distance
 
 from options import args
-from utils import AverageMeter, ProgressMeter
+from utils import AverageMeter, ProgressMeter, download_google
 
 
 class Trainer:
@@ -33,6 +35,16 @@ class Trainer:
             ),
         })
         self.models.to(args.device)
+        # pretrained classifier
+        self.clf = BertClassifier()
+        if args.clf_ckpt_path is not None:
+            download_google(FILE_ID, args.clf_ckpt_path)
+            ckpt = torch.load(
+                args.clf_ckpt_path,
+                map_location=lambda storage, loc: storage
+            )
+            self.clf.load_state_dict(ckpt['model_state_dict'])
+        self.clf.to(args.device)
 
         # get dataloaders
         self.train_loaders = get_dataloader_for_style_transfer(
@@ -185,7 +197,12 @@ class Trainer:
 
         progress_meter.display(len(self.train_loaders[0]))
 
+    def evaluate(self):
+        pass
+        import pdb; pdb.set_trace()
+
 
 if __name__ == '__main__':
     trainer = Trainer()
+    trainer.evaluate()
     trainer.train_epoch()

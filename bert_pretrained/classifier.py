@@ -2,14 +2,15 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
+import requests
 import time
 from copy import deepcopy
 import torch
 import torch.nn as nn
-import torch.optim as optim
+from transformers import get_linear_schedule_with_warmup
 
-from bert_pretrained.model import BERT
 from dataloader import get_dataloader_for_classification
+from bert_pretrained.model import BERT
 from utils import AverageMeter, ProgressMeter
 from options import args
 
@@ -51,10 +52,15 @@ class BertClassifierTrainer:
         )
 
         # get optimizer
-        self.optimizer = optim.AdamW(
+        self.optimizer = torch.optim.AdamW(
             self.model.parameters(),
             lr=args.lr,
             weight_decay=args.weight_decay
+        )
+        self.scheduler = get_linear_schedule_with_warmup(  # linear decay
+            self.optimizer,
+            num_warmup_steps=0,
+            num_training_steps=len(self.train_loader) * args.epochs
         )
         self.criterion = nn.CrossEntropyLoss()
 
@@ -93,7 +99,12 @@ class BertClassifierTrainer:
 
             self.optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(
+                self.model.parameters(),
+                args.max_grad_norm
+            )
             self.optimizer.step()
+            self.scheduler.step()
 
             avg_meters['loss'].update(loss.item(), input_ids.size(0))
             avg_meters['acc'].update(acc * 100, input_ids.size(0))
@@ -143,6 +154,7 @@ class BertClassifierTrainer:
             print("Best val acc, checkpoint saved")
 
 
+# Train classifier
 if __name__ == '__main__':
     trainer = BertClassifierTrainer()
     for _ in range(args.epochs):

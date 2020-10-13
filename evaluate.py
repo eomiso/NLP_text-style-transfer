@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import torch
 
-from bert_pretrained import extract_features
+from bert_pretrained import extract_features, bert_tokenizer
 from utils import covariance, sqrtm
 
 
@@ -64,4 +64,10 @@ def calculate_frechet_distance(text1, text2, verbose=False):
 
 
 def calculate_accuracy(clf, text):
-    pass
+    inputs = bert_tokenizer(
+        text,
+        add_special_tokens=True,
+        return_tensors='pt',
+        padding=True
+    ).to(clf.device)
+    import pdb; pdb.set_trace()

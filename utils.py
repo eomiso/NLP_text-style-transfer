@@ -1,7 +1,26 @@
+import os
+import requests
 import torch
 from torch.autograd import Function
 import numpy as np
 import scipy.linalg
+
+URL = "https://docs.google.com/uc?export=download"
+
+
+def download_google(file_id, filename):
+    if not os.path.isfile(filename):
+        # Request file from URL
+        session = requests.Session()
+        response = session.get(URL, params={'id': file_id}, stream=True)
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                params = {'id': file_id, 'confirm': value}
+                response = session.get(URL, params=params, stream=True)
+
+        # Download file
+        with open(filename, 'wb') as f:
+            f.write(response.content)
 
 
 def str2bool(s):
