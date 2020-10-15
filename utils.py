@@ -8,7 +8,20 @@ import scipy.linalg
 URL = "https://docs.google.com/uc?export=download"
 
 
+def save_model(model, ckpt_path):
+    pardir = os.path.dirname(os.path.abspath(ckpt_path))
+    if not os.path.isdir(pardir):
+        os.makedirs(pardir, exist_ok=True)
+    torch.save(
+        {'model_state_dict': model.state_dict()},
+        ckpt_path
+    )
+
+
 def download_google(file_id, filename):
+    pardir = os.path.dirname(os.path.abspath(filename))
+    if not os.path.isdir(pardir):
+        os.makedirs(pardir, exist_ok=True)
     if not os.path.isfile(filename):
         # Request file from URL
         session = requests.Session()

@@ -11,6 +11,7 @@ from bert_pretrained import bert_tokenizer, get_bert_word_embedding, FILE_ID
 from bert_pretrained.classifier import BertClassifier
 from loss import loss_fn, gradient_penalty
 from evaluate import calculate_accuracy, calculate_frechet_distance
+from transfer import style_transfer
 
 from options import args
 from utils import AverageMeter, ProgressMeter, download_google
@@ -45,13 +46,11 @@ class Trainer:
             )
             self.clf.load_state_dict(ckpt['model_state_dict'])
         self.clf.to(args.device)
+        self.clf.eval()
 
         # get dataloaders
         self.train_loaders = get_dataloader_for_style_transfer(
             args.text_file_path, shuffle=True, drop_last=True
-        )
-        self.val_loaders = get_dataloader_for_style_transfer(
-            args.val_text_file_path, shuffle=False, drop_last=False
         )
         # label placeholders
         self.zeros = torch.zeros(args.batch_size, 1).to(args.device)
@@ -198,11 +197,42 @@ class Trainer:
         progress_meter.display(len(self.train_loaders[0]))
 
     def evaluate(self):
-        pass
-        import pdb; pdb.set_trace()
+        self.models.eval()
+        # generate samples
+        inputs0, inputs1, outputs0, outputs1 = style_transfer(
+            encoder=self.models['encoder'],
+            generator=self.models['generator'],
+            text_path=args.val_text_file_path,
+            n_samples=args.n_samples
+        )
+
+        # display 10 samples for each
+        print('=' * 30 + '\nnegative -> positive\n' + '=' * 30 + '\n')
+        for original, transfer in zip(inputs0[:10], outputs0[:10]):
+            print(original + ' -> ' + transfer + '\n')
+        print('=' * 30 + '\npositive -> negative\n' + '=' * 30 + '\n')
+        for original, transfer in zip(inputs1[:10], outputs1[:10]):
+            print(original + ' -> ' + transfer + '\n')
+
+        print("Evaluation from {} samples".format(args.n_samples))
+        fed = (calculate_frechet_distance(inputs1, outputs0)
+               + calculate_frechet_distance(inputs0, outputs1))
+        print('FED: {:.4f}'.format(fed))
+
+        loss, acc = calculate_accuracy(
+            self.clf,
+            outputs0 + outputs1,
+            torch.cat([
+                torch.ones(len(outputs0)),
+                torch.zeros(len(outputs1))
+            ]).long().to(args.device)
+        )
+        print('Loss: {:.4f}'.format(loss.item()))
+        print('Accuracy: {:.4f}\n'.format(acc.item()))
 
 
 if __name__ == '__main__':
     trainer = Trainer()
-    trainer.evaluate()
-    trainer.train_epoch()
+    for _ in range(args.epochs):
+        trainer.train_epoch()
+        trainer.evaluate()

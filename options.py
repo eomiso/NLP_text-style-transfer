@@ -103,15 +103,15 @@ argparser.add_argument('--transfer_to',
                        default=1,
                        type=int,
                        choices=[0, 1])
+argparser.add_argument('--n_samples',
+                       default=1000,
+                       type=int)
 argparser.add_argument('--transfer_max_len',
                        default=64,
                        type=int)
 argparser.add_argument("--transfer_result_save_path",
                        default=None,
                        help="path to save transfer result")
-argparser.add_argument('--test_recon',
-                       default=False,
-                       type=str2bool)
 
 # others
 argparser.add_argument("--cuda_device",
@@ -130,11 +130,13 @@ if args.dataset == 'yelp':
     args.text_file_path = 'data/yelp/yelp.sentiment.train'
     args.val_text_file_path = 'data/yelp/yelp.sentiment.val'
     args.test_text_path = 'data/yelp/yelp.sentiment.test'
+    args.clf_ckpt_path = 'checkpoints/yelp_clf.pt'
 elif args.dataset == 'nsmc':
     args.language = 'ko'
     args.text_file_path = 'data/nsmc/ratings_train.txt'
     args.val_text_file_path = 'data/nsmc/ratings_test.txt'
     args.test_text_path = 'data/nsmc/ratings_test.test'
+    args.clf_ckpt_path = 'checkpoints/nsmc_clf.pt'
 elif args.dataset is None:
     assert args.text_file_path is not None
     assert args.val_text_file_path is not None

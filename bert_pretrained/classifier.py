@@ -11,7 +11,7 @@ from transformers import get_linear_schedule_with_warmup
 
 from dataloader import get_dataloader_for_classification
 from bert_pretrained.model import BERT
-from utils import AverageMeter, ProgressMeter
+from utils import AverageMeter, ProgressMeter, save_model
 from options import args
 
 
@@ -147,10 +147,7 @@ class BertClassifierTrainer:
 
         if acc_avg_meter.avg > self.best_val_acc:
             self.best_val_acc = acc_avg_meter.avg
-            torch.save(
-                {'model_state_dict': self.model.state_dict()},
-                args.ckpt_path
-            )
+            save_model(self.model, args.ckpt_path)
             print("Best val acc, checkpoint saved")
 
 
