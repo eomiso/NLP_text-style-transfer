@@ -4,6 +4,7 @@ import torch.optim as optim
 from torch.nn import functional as F
 import time
 import itertools
+import sys, os
 
 from dataloader import get_dataloader_for_style_transfer
 from model import Encoder, Generator, Discriminator
@@ -14,27 +15,30 @@ from evaluate import calculate_accuracy, calculate_frechet_distance
 from transfer import style_transfer
 
 from options import args
-from utils import AverageMeter, ProgressMeter, download_google
+from utils import AverageMeter, ProgressMeter, download_google, Metric_Printer
 
 
 class Trainer:
     def __init__(self):
         # get models
         embedding = get_bert_word_embedding()
-        self.models = nn.ModuleDict({
-            'embedding': embedding,
-            'encoder': Encoder(embedding, args.dim_y, args.dim_z),
-            'generator': Generator(
-                embedding, args.dim_y, args.dim_z, args.temperature,
-                bert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel
-            ),
-            'disc_0': Discriminator(  # 0: real, 1: fake
-                args.dim_y + args.dim_z, args.n_filters, args.filter_sizes
-            ),
-            'disc_1': Discriminator(  # 1: real, 0: fake
-                args.dim_y + args.dim_z, args.n_filters, args.filter_sizes
-            ),
-        })
+        if os.path.isfile(args.load_ckpt):
+            self.models = torch.load(args.load_ckpt)
+        else:
+            self.models = nn.ModuleDict({
+                'embedding': embedding,
+                'encoder': Encoder(embedding, args.dim_y, args.dim_z),
+                'generator': Generator(
+                    embedding, args.dim_y, args.dim_z, args.temperature,
+                    bert_tokenizer.bos_token_id, use_gumbel=args.use_gumbel
+                ),
+                'disc_0': Discriminator(  # 0: real, 1: fake
+                    args.dim_y + args.dim_z, args.n_filters, args.filter_sizes
+                ),
+                'disc_1': Discriminator(  # 1: real, 0: fake
+                    args.dim_y + args.dim_z, args.n_filters, args.filter_sizes
+                ),
+            })
         self.models.to(args.device)
         # pretrained classifier
         self.clf = BertClassifier()
@@ -179,11 +183,18 @@ class Trainer:
             avg_meters['loss_adv'].update(loss_adv.item(), src_0.size(0))
 
             # XXX: threshold for training stability
-            if (args.threshold is not None
-                    and loss_disc < args.threshold):
-                loss = loss_rec + args.rho * loss_adv
-            else:
-                loss = loss_rec
+            if (not args.two_stage):
+                if (args.threshold is not None
+                        and loss_disc < args.threshold):
+                    loss = loss_rec + args.rho * loss_adv
+                else:
+                    loss = loss_rec
+            else: # two_stage training
+                if (args.second_stage_num > args.epochs-self.epoch): 
+                    # last second_stage; flow loss_adv gradients
+                    loss = loss_rec + args.rho * loss_adv
+                else:
+                    loss = loss_rec
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -229,10 +240,41 @@ class Trainer:
         )
         print('Loss: {:.4f}'.format(loss.item()))
         print('Accuracy: {:.4f}\n'.format(acc.item()))
+        return fed, loss.item(), acc.item()
+
+
+class Translator:
+    def __init__(self):
+        self.models = torch.load(args.ckpt_path)
+    def transfer(self):
+        self.models.eval()
+        if args.mode == 'interactive':
+            args.test_text_path = None
+        _, _, _, _ = style_transfer(
+            encoder=self.models['encoder'],
+            generator=self.models['generator'],
+            text_path=args.test_text_path,
+            n_samples=args.n_samples
+        )
 
 
 if __name__ == '__main__':
-    trainer = Trainer()
-    for _ in range(args.epochs):
-        trainer.train_epoch()
-        trainer.evaluate()
+    if args.mode == 'train':
+        trainer = Trainer()
+        printer = Metric_Printer('FED', 'Loss', 'Acc')
+        
+        loss_save = sys.maxsize
+        for _ in range(args.epochs):
+
+            trainer.train_epoch()
+            fed, loss, acc = trainer.evaluate()
+            if loss < loss_save:
+                loss_save = loss
+                print ("saving model : " + args.ckpt_path)
+                torch.save(trainer.models, args.ckpt_path)
+
+            printer.update(fed, loss, acc)
+        print(printer)
+    else:
+        translator = Translator()
+        translator.transfer()
