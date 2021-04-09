@@ -88,7 +88,7 @@ def style_transfer(encoder=None, generator=None, text_path=None, n_samples=100):
                     outputs1.append(output)
                 pbar.update()
                 if fw is not None:
-                    fw.write(text + ' -> ' + output + '\n')
+                    fw.write(label + ' > ' + str(1-int(label)) + ': '+ text + ' -> ' + output + '\n')
                 if counter > n_samples:
                     break
 
