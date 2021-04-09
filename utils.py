@@ -151,3 +151,22 @@ class MatrixSquareRoot(Function):
 
 def sqrtm(m):
     return MatrixSquareRoot.apply(m)
+
+class Metric_Printer(object):
+    def __init__(self, *meters):
+        self.meters = list(meters)
+        self.values = []
+    def update(self, *values):
+        self.values.append(values)
+    def __str__(self):
+        names = '{:^6}'.format('epoch')
+        val = ''
+        for i in range(len(self.meters)):
+            names += '{:^10}'.format(self.meters[i]) 
+        names += '\n'
+        for i in range(len(self.values)):
+            val += '[{:^6}]'.format(i+1)
+            for j in range(len(self.values[i])):
+                val += '{:^10.4f}'.format(self.values[i][j])
+            val += '\n' 
+        return names + val
