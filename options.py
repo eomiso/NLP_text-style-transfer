@@ -79,6 +79,12 @@ argparser.add_argument('--use_gumbel',
 argparser.add_argument('--rho',  # loss_rec + rho * loss_adv
                        type=float,
                        default=1)
+argparser.add_argument('--two_stage',
+                        type=str2bool,
+                        default=False)
+argparser.add_argument('--second_stage_num',
+                        type=int,
+                        default=2)
 argparser.add_argument('--gan_type',
                        default='vanilla',
                        choices=['vanilla', 'wgan-gp', 'lsgan'])
@@ -96,10 +102,15 @@ argparser.add_argument('--threshold',
                        default=None)
 
 # testing
+argparser.add_argument('--mode',
+                        help='train or transfer',
+                        choices=['train', 'transfer', 'interactive'],
+                        default='train',
+                        type=str)
 argparser.add_argument('--test_text_path',
                        help='path to text file whose each line contains one sentence',
                        default=None)
-argparser.add_argument('--transfer_to',
+argparser.add_argument('--transfer_to', #only use in interactive transfer
                        default=1,
                        type=int,
                        choices=[0, 1])
@@ -117,6 +128,9 @@ argparser.add_argument("--transfer_result_save_path",
 argparser.add_argument("--cuda_device",
                        type=int,
                        default=0)
+argparser.add_argument("--load_ckpt", # Tobe deleted after experimenting
+                       type=str,
+                       default="ckpts/wgan_no_threshold.pt")
 
 args = argparser.parse_args()
 
