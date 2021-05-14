@@ -149,7 +149,7 @@ elif args.dataset == 'nsmc':
     args.language = 'ko'
     args.text_file_path = 'data/nsmc/ratings_train.txt'
     args.val_text_file_path = 'data/nsmc/ratings_test.txt'
-    args.test_text_path = 'data/nsmc/ratings_test.test'
+    args.test_text_path = 'data/nsmc/ratings_test.txt'
     args.clf_ckpt_path = 'checkpoints/nsmc_clf.pt'
 elif args.dataset is None:
     assert args.text_file_path is not None
