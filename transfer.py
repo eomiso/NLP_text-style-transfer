@@ -105,8 +105,15 @@ def generate_text(encoder, generator, original_label, tokens):
         eos_token_id=bert_tokenizer.eos_token_id,
         max_len=args.transfer_max_len
     )
-    if predictions[-1] == bert_tokenizer.eos_token_id:
-        predictions = predictions[:-1]
+    # change this part to first occurence of ber_tokenizer.eos_token_id
+    #if predictions[-1] == bert_tokenizer.eos_token_id:
+    #    predictions = predictions[:-1]
+
+    try:
+        eos_idx = predictions.index(bert_tokenizer.eos_token_id)
+        predictions = predictions[:eos_idx]
+    except ValueError:
+        predictions=predictions[:-1]
     return bert_tokenizer.decode(predictions)
 
 
