@@ -1,5 +1,8 @@
 This is a pytorch implementation of NeuLIPS Paper **[Style Transfer from Non-Parallel Text by Cross-Alignment](https://arxiv.org/pdf/1705.09655v2.pdf)**
 
+Detailed Information about the implementation and experiments are in this [blog post](https://blog.diyaml.com/teampost/Text-Style-Transfer/)
+
+
 ## Index
 1. [Introduction](#intro)
 2. [Paper Summary](#paper_summary)
@@ -296,4 +299,3 @@ language-style-transfer는 2017년에 처음 선보인 후에 꾸준히 관련 �
 #### <sup><a name="contextual_rnn"></a>5</sup><sub><a href="https://arxiv.org/pdf/1902.03455.pdf#:~:text=The%20performance%20on%20an%20associative,information%20from%20the%20input%20sequence.&text=The%20initialization%20method%20of%20the,most%20commonly%20equal%20to%20zero" target="_blank">Contextual Recurrent Neural Networks, Wenke et al, arXiv:1902.03455, 2019</a></sub>
 
 
-Detailed Information about the implementation and experiments are in this [blog post](https://blog.diyaml.com/teampost/Text-Style-Transfer/)
