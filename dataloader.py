@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from bert_pretrained.tokenizer import bert_tokenizer
 from options import args
-
+import pandas as pd
 
 class SentimentAnalysis(Dataset):
     def __init__(self, txt_path, maxlen=256):
@@ -13,10 +13,11 @@ class SentimentAnalysis(Dataset):
         with open(txt_path) as fr:
             fr.readline()  # header line
             for line in fr:
-                line = line.strip().split('\t')  # expects tsv format
+                line = line.strip().split(',')  # expects tsv format
                 self.texts.append(line[1])
-                self.labels.append(int(line[2]))
-
+                self.labels.append(0)
+                self.texts.append(line[2])
+                self.labels.append(1)
     def __len__(self):
         return len(self.texts)
 
@@ -37,13 +38,28 @@ class StyleTransfer(Dataset):
         self.maxlen = maxlen
         self.texts = []
         self.labels = []
-        with open(txt_path) as fr:
-            fr.readline()  # header line
-            for line in fr:
-                line = line.strip().split('\t')  # expects tsv format
-                if int(line[2]) == label:
-                    self.texts.append(line[1])
-                    self.labels.append(int(line[2]))
+        # with open(txt_path) as fr:
+        #     fr.readline()  # header line
+        #     for line in fr:
+        #         line = line.strip().split('\t')  # expects tsv format
+        #         if int(line[2]) == label:
+        #             self.texts.append(line[1])
+        #             self.labels.append(int(line[2]))
+        #     print("end")
+        # if data file = AIhub=>
+        df = pd.read_csv(txt_path)
+        for i in range(len(df["document"])):
+            if int(df["label"][i]) == label :
+                self.texts.append(df["document"][i])
+                self.labels.append(int(df["label"][i]))
+                
+        # self.texts = list(df["document"])
+        # self.labels =  list(df["label"])
+        print("end")
+
+
+
+        # df = pd.read_df[1]
 
     def __len__(self):
         return len(self.texts)
@@ -87,7 +103,7 @@ def get_dataloader_for_classification(txt_path, shuffle=True, drop_last=True):
     )
 
 
-def get_dataloader_for_style_transfer(txt_path, shuffle=True, drop_last=True):
+def get_dataloader_for_style_transfer(txt_path, shuffle=False, drop_last=True):
     def collate_fn(data):
         input_ids, class_labels = zip(*data)
 
